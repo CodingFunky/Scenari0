@@ -69,9 +69,9 @@ that competition.
   its last cached results and won't crash.
 - For production, set `ALLOW_ORIGIN` in `worker.js` to your GitHub Pages origin
   instead of `*`.
-- **Odds:** the app requests `/odds/sports/soccer_world_cup/odds?regions=eu&markets=h2h`.
+- **Odds:** the app requests `/odds/sports/soccer_fifa_world_cup/odds?regions=eu&markets=h2h`.
   The Odds API free tier is 500 req/month and only lists active/upcoming events,
   so 2026 WC odds may be empty — the simulation falls back to a FIFA-rankings-only
   blend when no odds are returned. Test directly with:
-  `curl "https://worldcup-proxy.<sub>.workers.dev/odds/sports/soccer_world_cup/odds?regions=eu&markets=h2h"`
+  `curl "https://worldcup-proxy.<sub>.workers.dev/odds/sports/soccer_fifa_world_cup/odds?regions=eu&markets=h2h"`
 ```

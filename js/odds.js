@@ -6,7 +6,7 @@ import { normalizeTeam } from './teams.js';
 // refetch on every run (spec: cache per fixture, only fetch when missing).
 
 const CACHE_KEY = 'odds_cache';
-const SPORT = 'soccer_world_cup';
+const SPORT = 'soccer_fifa_world_cup'; // The Odds API's key for the men's World Cup
 
 // ─── Pure parsing (no network — testable) ────────────────────────────────────
 
