@@ -1,30 +1,40 @@
-// Cloudflare Worker — football-data.org proxy for Scenari0.
+// Cloudflare Worker — multi-source proxy for Scenari0.
 //
 // Why this exists: the app is a static client-side site, so it has no server
-// and no env vars. Putting the API key in browser JS would expose it publicly,
-// and football-data.org doesn't send permissive CORS headers for browsers.
-// This Worker holds the key in a real server-side secret, injects it as the
-// X-Auth-Token header, and adds CORS headers so the browser app can call it.
+// and no env vars. Putting API keys in browser JS would expose them publicly.
+// This Worker holds each provider's key in a server-side secret, injects it the
+// way that provider expects, and adds CORS so the browser app can call it.
+//
+// Routes:
+//   /competitions/*  -> football-data.org   (auth: X-Auth-Token header, secret FOOTBALL_DATA_KEY)
+//   /odds/*          -> The Odds API        (auth: apiKey query param,   secret ODDS_API_KEY)
 //
 // Deploy (CLI):
 //   npm i -g wrangler
 //   wrangler login
-//   wrangler secret put FOOTBALL_DATA_KEY   # paste your key when prompted
+//   wrangler secret put FOOTBALL_DATA_KEY   # paste your football-data.org key
+//   wrangler secret put ODDS_API_KEY        # paste your The Odds API key
 //   wrangler deploy
-// Then paste the resulting https://<name>.<subdomain>.workers.dev URL into the
-// app's  ⚙ Sync settings  field.
-//
-// (Dashboard alternative: Cloudflare dashboard → Workers → Create → paste this
-//  file → Settings → Variables → add encrypted var FOOTBALL_DATA_KEY.)
+// Then paste the Worker URL into the app's ⚙ Sync settings field.
 
-const UPSTREAM = 'https://api.football-data.org/v4';
+const ROUTES = [
+  {
+    prefix: '/competitions',
+    upstream: 'https://api.football-data.org/v4',
+    strip: false,                  // keep /competitions in the forwarded path
+    secret: 'FOOTBALL_DATA_KEY',
+    auth: { type: 'header', name: 'X-Auth-Token' },
+  },
+  {
+    prefix: '/odds',
+    upstream: 'https://api.the-odds-api.com/v4',
+    strip: true,                   // strip /odds before forwarding
+    secret: 'ODDS_API_KEY',
+    auth: { type: 'query', name: 'apiKey' },
+  },
+];
 
-// Only let the key be used for these paths, so a leaked proxy URL can't be
-// abused to drain your API quota on arbitrary endpoints.
-const ALLOWED_PATHS = ['/competitions'];
-
-// Tighten this to your GitHub Pages origin in production,
-// e.g. 'https://yourname.github.io'.
+// Tighten this to your GitHub Pages origin in production, e.g. 'https://you.github.io'.
 const ALLOW_ORIGIN = '*';
 
 export default {
@@ -37,25 +47,28 @@ export default {
     }
 
     const url = new URL(request.url);
-    const allowed = ALLOWED_PATHS.some(
-      p => url.pathname === p || url.pathname.startsWith(p + '/')
+    const route = ROUTES.find(
+      r => url.pathname === r.prefix || url.pathname.startsWith(r.prefix + '/')
     );
-    if (!allowed) return json({ error: 'Path not allowed' }, 403);
+    if (!route) return json({ error: 'Path not allowed' }, 403);
 
-    if (!env.FOOTBALL_DATA_KEY) {
-      return json({ error: 'Proxy is missing the FOOTBALL_DATA_KEY secret' }, 500);
+    const key = env[route.secret];
+    if (!key) return json({ error: `Proxy is missing the ${route.secret} secret` }, 500);
+
+    const path = route.strip ? url.pathname.slice(route.prefix.length) : url.pathname;
+    const upstreamUrl = new URL(route.upstream + path);
+    upstreamUrl.search = url.search;
+
+    const headers = { Accept: 'application/json' };
+    if (route.auth.type === 'header') {
+      headers[route.auth.name] = key;
+    } else {
+      upstreamUrl.searchParams.set(route.auth.name, key);
     }
 
-    const upstreamUrl = UPSTREAM + url.pathname + url.search;
     let upstreamRes;
     try {
-      upstreamRes = await fetch(upstreamUrl, {
-        headers: {
-          // football-data.org authenticates with this header.
-          'X-Auth-Token': env.FOOTBALL_DATA_KEY,
-          'Accept': 'application/json',
-        },
-      });
+      upstreamRes = await fetch(upstreamUrl.toString(), { headers });
     } catch (err) {
       return json({ error: 'Upstream fetch failed: ' + err.message }, 502);
     }

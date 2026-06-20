@@ -117,6 +117,20 @@ body {
 }
 .btn-reset:hover { background: #3a1a1a; }
 
+.btn-clear {
+  background: var(--danger);
+  border: 1px solid var(--danger);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-clear:hover { background: #b62b28; }
+
 /* ── Tabs ─────────────────────────────────────────────────────────────────── */
 .tab-nav {
   display: flex;
@@ -487,6 +501,55 @@ main { padding: 0; }
   border-radius: 3px;
   font-size: 10px;
 }
+
+/* ── Simulation controls ─────────────────────────────────────────────────── */
+.sim-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.odds-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+.odds-toggle input { cursor: pointer; }
+
+.btn-sim {
+  background: #6e40c9;          /* purple — distinct from green sync */
+  border: 1px solid #5a32a3;
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s, opacity 0.15s;
+}
+.btn-sim:hover { background: #5a32a3; }
+.btn-sim:disabled { opacity: 0.6; cursor: progress; }
+.btn-sim .sim-icon { display: inline-block; }
+.btn-sim.loading .sim-icon { animation: spin 0.8s linear infinite; }
+
+.btn-sim-reset {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+.btn-sim-reset:hover { color: var(--text-hl); border-color: var(--text-dim); }
 
 /* ── Error state ─────────────────────────────────────────────────────────── */
 .load-error {
