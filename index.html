@@ -9,6 +9,7 @@
 <body>
   <header class="app-header">
     <div class="header-inner">
+      <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
       <div class="header-title">
         <span class="logo-text">Scenari0</span>
         <span class="logo-sub">2026 FIFA World Cup · What-If Explorer</span>
@@ -48,16 +49,15 @@
           <span id="sim-status" class="sync-status"></span>
         </div>
 
-        <button id="reset-btn" class="btn-reset" title="Clear hypotheticals (manual + simulated + picks); keep synced results">Reset Unplayed</button>
         <button id="clear-btn" class="btn-clear" title="Clear absolutely everything, including synced results">Clear All</button>
       </div>
     </div>
   </header>
 
   <nav class="tab-nav">
-    <button class="tab-btn active" data-tab="tab-groups">Group Stage</button>
-    <button class="tab-btn" data-tab="tab-bracket">Bracket</button>
-    <button class="tab-btn" data-tab="tab-thirds">Best 3rd-Place</button>
+    <button class="tab-btn active" data-tab="tab-groups"><span class="t-long">Group Stage</span><span class="t-short">Groups</span></button>
+    <button class="tab-btn" data-tab="tab-bracket"><span class="t-long">Bracket</span><span class="t-short">Bracket</span></button>
+    <button class="tab-btn" data-tab="tab-thirds"><span class="t-long">Best 3rd-Place</span><span class="t-short">3rd</span></button>
   </nav>
 
   <main>

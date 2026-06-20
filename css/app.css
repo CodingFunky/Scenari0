@@ -558,3 +558,149 @@ main { padding: 0; }
   text-align: center;
   font-size: 16px;
 }
+
+/* Hamburger is desktop-hidden; only appears in the mobile layout below. */
+.menu-toggle { display: none; }
+/* Tabs show full labels by default; short labels swap in on mobile. */
+.tab-btn .t-short { display: none; }
+
+/* ── Mobile layout (≤640px) ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Header collapses to just a floating hamburger; everything overlays content */
+  .app-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    background: transparent;
+    border-bottom: none;
+    padding: 8px;
+    z-index: 300;
+    pointer-events: none;            /* taps pass through except on the controls */
+  }
+  .header-inner { justify-content: flex-end; gap: 0; max-width: none; }
+  .header-title { display: none; }
+
+  /* Frosted floating hamburger, top-right */
+  .menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    color: var(--text-hl);
+    background: rgba(22, 27, 34, 0.72);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+  }
+
+  /* Controls become a frosted overlay panel, hidden until the menu is open */
+  .header-controls {
+    pointer-events: auto;
+    position: fixed;
+    top: 60px;
+    right: 8px;
+    width: min(84vw, 320px);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 14px;
+    background: rgba(22, 27, 34, 0.88);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: top right;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+    z-index: 300;
+  }
+  body.menu-open .header-controls {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  /* Drop the follow-team search on mobile */
+  .highlight-label,
+  .highlight-wrap { display: none; }
+
+  /* Stack the control groups; full-width, finger-friendly buttons */
+  .sync-group,
+  .sim-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    position: static;
+  }
+  .btn-sync,
+  .btn-sim,
+  .btn-sim-reset,
+  .btn-clear {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    text-align: center;
+  }
+  .odds-toggle { justify-content: flex-start; font-size: 14px; padding: 2px; }
+  .sync-status,
+  .sim-status { max-width: 100%; white-space: normal; font-size: 12px; }
+
+  /* cog settings popover sits inline within the panel */
+  .sync-settings { align-self: flex-start; }
+  .sync-settings-body {
+    position: static;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  /* Tabs: a small horizontal frosted group pinned top-left, beside the hamburger.
+     position:fixed → stays put, does not scroll with the page. */
+  .tab-nav {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    flex-direction: row;
+    width: auto;
+    gap: 4px;
+    padding: 4px;
+    background: rgba(22, 27, 34, 0.72);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    z-index: 300;
+  }
+  .tab-btn {
+    border-bottom: none;
+    border-radius: 7px;
+    padding: 9px 11px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .tab-btn .t-long { display: none; }
+  .tab-btn .t-short { display: inline; }
+
+  /* Strip the intro text; push content below the fixed top bar (tabs + hamburger) */
+  .panel-intro { display: none; }
+  main { padding-top: 64px; }
+  .groups-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 8px;
+  }
+  .bracket-scroll { padding: 8px; }
+  #thirds-panel { padding-left: 0; }
+}
