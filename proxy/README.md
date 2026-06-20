@@ -1,8 +1,10 @@
 # Scenari0 sync proxy
 
-A tiny Cloudflare Worker that lets the static app pull live World Cup results
-from [football-data.org](https://www.football-data.org/) without exposing your
-API key in the browser.
+A tiny Cloudflare Worker that lets the static app reach external APIs without
+exposing keys in the browser. It routes two providers:
+
+- `/competitions/*` → [football-data.org](https://www.football-data.org/) (results), auth `X-Auth-Token`, secret `FOOTBALL_DATA_KEY`
+- `/odds/*` → [The Odds API](https://the-odds-api.com/) (betting odds), auth `apiKey` query param, secret `ODDS_API_KEY`
 
 ## Why a proxy?
 
@@ -23,7 +25,8 @@ also doesn't send permissive CORS headers for browser use. This Worker:
 npm i -g wrangler
 wrangler login
 cd proxy
-wrangler secret put FOOTBALL_DATA_KEY   # paste your key when prompted
+wrangler secret put FOOTBALL_DATA_KEY   # paste your football-data.org key
+wrangler secret put ODDS_API_KEY         # paste your The Odds API key
 wrangler deploy
 ```
 
@@ -66,4 +69,9 @@ that competition.
   its last cached results and won't crash.
 - For production, set `ALLOW_ORIGIN` in `worker.js` to your GitHub Pages origin
   instead of `*`.
+- **Odds:** the app requests `/odds/sports/soccer_world_cup/odds?regions=eu&markets=h2h`.
+  The Odds API free tier is 500 req/month and only lists active/upcoming events,
+  so 2026 WC odds may be empty — the simulation falls back to a FIFA-rankings-only
+  blend when no odds are returned. Test directly with:
+  `curl "https://worldcup-proxy.<sub>.workers.dev/odds/sports/soccer_world_cup/odds?regions=eu&markets=h2h"`
 ```

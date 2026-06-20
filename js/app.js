@@ -1,6 +1,9 @@
 import { deriveAll } from './engine.js';
-import { getState, subscribe, resetState, applySyncedScores } from './state.js';
+import { getState, subscribe, resetState, applySyncedScores,
+         applySimResults, resetSimulation } from './state.js';
 import { fetchFinishedMatches, computeSyncUpdates } from './sync.js';
+import { simulateRemaining } from './sim.js';
+import { loadOdds } from './odds.js';
 import { renderGroupStage } from './ui/group-stage.js';
 import { renderBracket }    from './ui/bracket.js';
 
@@ -23,6 +26,7 @@ async function init() {
   setupHighlight();
   setupReset();
   setupSync();
+  setupSim();
 
   subscribe(render);
   render(getState());
@@ -190,6 +194,73 @@ async function runSync(btn) {
 
 function setSyncStatus(kind, text) {
   const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.className = `sync-status ${kind}`;
+  el.textContent = text;
+}
+
+// ─── Probabilistic simulation ────────────────────────────────────────────────
+
+const USE_ODDS_KEY = 'use_odds';
+
+function setupSim() {
+  const simBtn = document.getElementById('sim-btn');
+  const resetBtn = document.getElementById('sim-reset-btn');
+  const oddsToggle = document.getElementById('use-odds-toggle');
+  if (!simBtn) return;
+
+  if (oddsToggle) {
+    oddsToggle.checked = localStorage.getItem(USE_ODDS_KEY) === '1';
+    oddsToggle.addEventListener('change', () => {
+      localStorage.setItem(USE_ODDS_KEY, oddsToggle.checked ? '1' : '0');
+    });
+  }
+
+  simBtn.addEventListener('click', () => runSimulation(simBtn));
+  resetBtn?.addEventListener('click', () => {
+    resetSimulation();
+    setSimStatus('success', 'Simulation cleared');
+  });
+}
+
+async function runSimulation(btn) {
+  btn.disabled = true;
+  btn.classList.add('loading');
+  setSimStatus('loading', 'Simulating…');
+
+  try {
+    let oddsByPair = null, oddsNote = '';
+    if (document.getElementById('use-odds-toggle')?.checked) {
+      const proxy = (localStorage.getItem('sync_proxy_url') || '').trim();
+      try {
+        oddsByPair = await loadOdds(proxy);
+        const n = oddsByPair ? Object.keys(oddsByPair).length : 0;
+        oddsNote = n ? `odds: ${n}` : 'no odds available';
+        if (!n) oddsByPair = null;
+      } catch (e) {
+        oddsNote = 'odds unavailable';
+        oddsByPair = null;
+        console.warn('Odds load failed:', e.message);
+      }
+    }
+
+    const res = simulateRemaining(getState(), DATA, RANKINGS, oddsByPair);
+    applySimResults(res); // triggers recompute of standings + bracket
+
+    let msg = `Simulated ${res.nGroup} group + ${res.nKO} knockout`;
+    if (oddsNote) msg += ` · ${oddsNote}`;
+    setSimStatus('success', msg);
+  } catch (err) {
+    setSimStatus('error', `Simulation failed: ${err.message}`);
+    console.error('Simulation error:', err);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+}
+
+function setSimStatus(kind, text) {
+  const el = document.getElementById('sim-status');
   if (!el) return;
   el.className = `sync-status ${kind}`;
   el.textContent = text;

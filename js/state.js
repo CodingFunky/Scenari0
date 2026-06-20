@@ -2,7 +2,10 @@
 // Picks are stored as "h"/"a" (home/away slot advances), NOT as team names.
 // Everything else is derived fresh on every change.
 
-const EMPTY = { scores: {}, picks: {} };
+// scores: group results (idx 0-71) with src 'manual'|'api'|'sim'
+// picks: manual knockout picks (id 73-104) -> 'h'|'a'
+// simPicks: simulated knockout picks -> 'h'|'a' (manual picks override these)
+const EMPTY = { scores: {}, picks: {}, simPicks: {} };
 let _state = loadFromUrl();
 const _listeners = new Set();
 
@@ -48,9 +51,25 @@ export function setPick(matchId, slot) {
 }
 
 export function resetState() {
-  _state = { scores: {}, picks: {} };
+  _state = { scores: {}, picks: {}, simPicks: {} };
   saveToUrl();
   _listeners.forEach(cb => cb(_state));
+}
+
+// Apply a simulation run: merge simulated group scores + replace simulated picks.
+// Manual/api scores and manual picks are untouched (sim only sends empty-or-sim).
+export function applySimResults({ scoreUpdates, simPicks }) {
+  const scores = { ..._state.scores, ...(scoreUpdates || {}) };
+  setState({ scores, simPicks: simPicks || {} });
+}
+
+// Reset Simulation: drop only sim-sourced results, keep manual + synced (api).
+export function resetSimulation() {
+  const scores = {};
+  for (const [idx, s] of Object.entries(_state.scores)) {
+    if (s && s.src !== 'sim') scores[idx] = s;
+  }
+  setState({ scores, simPicks: {} });
 }
 
 export function subscribe(cb) {
@@ -78,6 +97,7 @@ function loadFromUrl() {
     if (!s) return { ...EMPTY };
     const parsed = JSON.parse(atob(s));
     if (typeof parsed !== 'object' || !parsed.scores || !parsed.picks) return { ...EMPTY };
+    if (!parsed.simPicks) parsed.simPicks = {}; // back-compat for older URLs
     return parsed;
   } catch {
     return { ...EMPTY };

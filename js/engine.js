@@ -3,7 +3,9 @@ import { GROUP_TB, THIRD_TB, compare } from './tiebreaker.js';
 // ─── Main export ─────────────────────────────────────────────────────────────
 
 export function deriveAll(state, data, rankings) {
-  const { scores, picks } = state;
+  const { scores } = state;
+  // Effective picks: simulated picks underneath, manual picks take precedence.
+  const picks = { ...(state.simPicks || {}), ...(state.picks || {}) };
   const { groups, group_stage_schedule, knockout_bracket } = data;
   const schedule = group_stage_schedule.matches; // indexed 0–71
 
