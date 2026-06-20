@@ -74,7 +74,7 @@ gracefully (falls back to cached results / shows a "wait a minute" message).
   approach, which can be added later.
 - If `wrangler deploy` rejects the binding on your plan, the fallback is a
   Cloudflare dashboard **Rate Limiting rule** (Security → WAF) targeting the
-  Worker route; remove the `[[unsafe.bindings]]` block in that case.
+  Worker route; remove the `[[ratelimits]]` block in that case.
 
 ## Notes
 
