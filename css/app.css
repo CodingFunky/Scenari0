@@ -703,4 +703,24 @@ main { padding: 0; }
   }
   .bracket-scroll { padding: 8px; }
   #thirds-panel { padding-left: 0; }
+
+  /* Bracket: condense so much more fits on screen. Drop the tall fixed column
+     height + spread spacing (a desktop tree-alignment trick) — pack matches at
+     the top of each round and shrink the boxes. Narrower columns also let more
+     rounds peek into view. */
+  .bracket-rounds { min-width: 840px; }
+  .round-matches,
+  .round-matches.final-col {
+    min-height: 0;
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 4px 0;
+  }
+  .bracket-match { margin: 0 6px; min-width: 124px; }
+  .bracket-team { min-height: 22px; padding: 4px 7px; }
+  .team-name { font-size: 11px; }
+  .placeholder .team-name { font-size: 10px; }
+  .match-label { font-size: 9px; padding: 0 6px; }
+  .round-label { padding: 6px 8px; font-size: 10px; }
 }
