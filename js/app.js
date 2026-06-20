@@ -1,6 +1,6 @@
 import { deriveAll } from './engine.js';
 import { getState, subscribe, resetState, applySyncedScores,
-         applySimResults, resetSimulation } from './state.js';
+         applySimResults, resetSimulation, resetUnplayed } from './state.js';
 import { fetchFinishedMatches, computeSyncUpdates } from './sync.js';
 import { simulateRemaining } from './sim.js';
 import { loadOdds } from './odds.js';
@@ -24,7 +24,7 @@ async function init() {
 
   setupTabs();
   setupHighlight();
-  setupReset();
+  setupResets();
   setupSync();
   setupSim();
 
@@ -125,9 +125,16 @@ function setupHighlight() {
   });
 }
 
-function setupReset() {
+function setupResets() {
+  // Reset Unplayed: wipe hypotheticals (manual + simulated + picks), keep synced.
   document.getElementById('reset-btn')?.addEventListener('click', () => {
-    if (confirm('Reset all results and picks?')) {
+    if (confirm('Reset all unplayed results?\n\nSynced (real) match results are KEPT; manual entries, simulations, and knockout picks are cleared.')) {
+      resetUnplayed();
+    }
+  });
+  // Clear All: wipe absolutely everything, including synced results.
+  document.getElementById('clear-btn')?.addEventListener('click', () => {
+    if (confirm('Clear EVERYTHING, including synced match results?\n\nThis returns the app to a completely blank slate.')) {
       resetState();
     }
   });

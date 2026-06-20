@@ -117,6 +117,20 @@ body {
 }
 .btn-reset:hover { background: #3a1a1a; }
 
+.btn-clear {
+  background: var(--danger);
+  border: 1px solid var(--danger);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-clear:hover { background: #b62b28; }
+
 /* ── Tabs ─────────────────────────────────────────────────────────────────── */
 .tab-nav {
   display: flex;

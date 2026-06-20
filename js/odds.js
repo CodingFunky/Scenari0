@@ -7,6 +7,7 @@ import { normalizeTeam } from './teams.js';
 
 const CACHE_KEY = 'odds_cache';
 const SPORT = 'soccer_fifa_world_cup'; // The Odds API's key for the men's World Cup
+const TTL_MS = 6 * 60 * 60 * 1000;     // reuse cached odds for 6h (never refetch per sim)
 
 // ─── Pure parsing (no network — testable) ────────────────────────────────────
 
@@ -70,7 +71,8 @@ export function hasCachedOdds() {
 export async function loadOdds(proxyBase, { force = false } = {}) {
   if (!force) {
     const cached = readCache();
-    if (cached?.byPair && Object.keys(cached.byPair).length) return cached.byPair;
+    const fresh = cached && (Date.now() - (cached.at || 0)) < TTL_MS;
+    if (fresh && cached.byPair && Object.keys(cached.byPair).length) return cached.byPair;
   }
   if (!proxyBase) throw new Error('No proxy URL configured');
 
