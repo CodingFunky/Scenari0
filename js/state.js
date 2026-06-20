@@ -50,6 +50,18 @@ export function setPick(matchId, slot) {
   setState({ picks });
 }
 
+// Erase a knockout match's outcome entirely — both the manual pick AND any
+// simulated pick — so the match (and anything downstream of it) reverts to
+// undecided. Used when clicking the current winner in the bracket.
+export function clearMatch(matchId) {
+  const picks = { ..._state.picks };
+  const simPicks = { ..._state.simPicks };
+  let changed = false;
+  if (picks[matchId] !== undefined) { delete picks[matchId]; changed = true; }
+  if (simPicks[matchId] !== undefined) { delete simPicks[matchId]; changed = true; }
+  if (changed) setState({ picks, simPicks });
+}
+
 export function resetState() {
   _state = { scores: {}, picks: {}, simPicks: {} };
   saveToUrl();

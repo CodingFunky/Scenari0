@@ -1,4 +1,4 @@
-import { setPick } from '../state.js';
+import { setPick, clearMatch } from '../state.js';
 
 // Visual order of matches within each round (top→bottom) to align the bracket tree.
 // Each pair of adjacent R32 matches feeds the corresponding R16 match, etc.
@@ -61,8 +61,10 @@ function handlePickClick(e) {
   const matchId = Number(el.dataset.matchId);
   const side = el.dataset.side;
   const current = el.dataset.currentPick;
-  // Clicking the already-chosen winner clears the pick; otherwise sets it.
-  setPick(matchId, current === side ? null : side);
+  // Clicking the current winner erases the match (manual + simulated) so it
+  // reverts to undecided; clicking the other team sets a manual pick.
+  if (current === side) clearMatch(matchId);
+  else setPick(matchId, side);
 }
 
 function renderBracketMatch(id, m, highlightTeam, overrideLabel) {
