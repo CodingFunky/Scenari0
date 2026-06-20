@@ -75,17 +75,6 @@ export function applySimResults({ scoreUpdates, simPicks }) {
   setState({ scores, simPicks: simPicks || {} });
 }
 
-// Reset Unplayed: keep only synced (api) results — the real, played matches —
-// and clear everything hypothetical: manual scores, simulated scores, and all
-// knockout picks (manual + simulated). resetState() below is the full "Clear All".
-export function resetUnplayed() {
-  const scores = {};
-  for (const [idx, s] of Object.entries(_state.scores)) {
-    if (s && s.src === 'api') scores[idx] = s;
-  }
-  setState({ scores, picks: {}, simPicks: {} });
-}
-
 // Reset Simulation: drop only sim-sourced results, keep manual + synced (api).
 export function resetSimulation() {
   const scores = {};
