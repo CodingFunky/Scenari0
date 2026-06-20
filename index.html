@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scenari0 — 2026 FIFA World Cup Explorer</title>
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-title">
+        <span class="logo-text">Scenari0</span>
+        <span class="logo-sub">2026 FIFA World Cup · What-If Explorer</span>
+      </div>
+      <div class="header-controls">
+        <label class="highlight-label" for="highlight-input">Follow team:</label>
+        <div class="highlight-wrap">
+          <input id="highlight-input" type="text" placeholder="e.g. United States" autocomplete="off">
+          <button id="highlight-clear" title="Clear">✕</button>
+        </div>
+        <button id="reset-btn" class="btn-reset">Reset All</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="tab-groups">Group Stage</button>
+    <button class="tab-btn" data-tab="tab-bracket">Bracket</button>
+    <button class="tab-btn" data-tab="tab-thirds">Best 3rd-Place</button>
+  </nav>
+
+  <main>
+    <div id="tab-groups" class="tab-panel active">
+      <div class="panel-intro">Enter match scorelines. Standings update live; the bracket auto-fills as results lock in.</div>
+      <div id="group-stage-content"></div>
+    </div>
+
+    <div id="tab-bracket" class="tab-panel">
+      <div class="panel-intro">Click a team name to advance them. Placeholders resolve as group results are entered.</div>
+      <div id="bracket-content"></div>
+    </div>
+
+    <div id="tab-thirds" class="tab-panel">
+      <div class="panel-intro">All 12 third-placed teams ranked. Top 8 advance to the Round of 32 — assigned to slots by bipartite matching on eligible-group constraints.</div>
+      <div id="thirds-panel"></div>
+    </div>
+  </main>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "scenari0",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3333", "--directory", "C:\\Users\\Ryan\\Documents\\GitHub\\Scenari0"],
+      "port": 3333
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "_README": "Verified data for a 2026 FIFA World Cup scenario/bracket app. Group letters (A-L), the fixed knockout wiring (matches 73-104), and the third-place slot structure are confirmed against FIFA's official regulations and multiple outlets (ESPN/NBC/Sky/Wikipedia). TWO ITEMS NEED ATTENTION before you rely on full correctness: (1) the third_place_combination_table is a 495-row lookup (FIFA Annex C) — only a 3-row format sample is included here; you MUST load the full table from the official source and NEVER fabricate the missing rows. (2) group_stage_tiebreakers has a documented ambiguity in published sources about whether head-to-head or overall goal difference is applied first in 2026 — see notes there and verify against the official FIFA 2026 Regulations PDF.",
+
+  "tournament": "2026 FIFA World Cup",
+  "hosts": ["United States", "Canada", "Mexico"],
+
+  "groups": {
+    "A": ["Mexico", "South Africa", "South Korea", "Czechia"],
+    "B": ["Canada", "Bosnia and Herzegovina", "Qatar", "Switzerland"],
+    "C": ["Brazil", "Morocco", "Haiti", "Scotland"],
+    "D": ["United States", "Paraguay", "Australia", "Türkiye"],
+    "E": ["Germany", "Curaçao", "Ivory Coast", "Ecuador"],
+    "F": ["Netherlands", "Japan", "Sweden", "Tunisia"],
+    "G": ["Belgium", "Egypt", "Iran", "New Zealand"],
+    "H": ["Spain", "Cape Verde", "Saudi Arabia", "Uruguay"],
+    "I": ["France", "Senegal", "Iraq", "Norway"],
+    "J": ["Argentina", "Algeria", "Austria", "Jordan"],
+    "K": ["Portugal", "DR Congo", "Uzbekistan", "Colombia"],
+    "L": ["England", "Croatia", "Ghana", "Panama"]
+  },
+
+  "group_stage_schedule": {
+    "_note": "All 72 group matches in chronological order. 'group' is added for convenience (not in the user's raw feed). Dates are included only to convey order; you may ignore them.",
+    "matches": [
+      { "date": "2026-06-11", "group": "A", "home": "Mexico", "away": "South Africa" },
+      { "date": "2026-06-11", "group": "A", "home": "South Korea", "away": "Czechia" },
+      { "date": "2026-06-12", "group": "B", "home": "Canada", "away": "Bosnia and Herzegovina" },
+      { "date": "2026-06-12", "group": "D", "home": "United States", "away": "Paraguay" },
+      { "date": "2026-06-13", "group": "B", "home": "Qatar", "away": "Switzerland" },
+      { "date": "2026-06-13", "group": "C", "home": "Brazil", "away": "Morocco" },
+      { "date": "2026-06-13", "group": "C", "home": "Haiti", "away": "Scotland" },
+      { "date": "2026-06-13", "group": "D", "home": "Australia", "away": "Türkiye" },
+      { "date": "2026-06-14", "group": "E", "home": "Germany", "away": "Curaçao" },
+      { "date": "2026-06-14", "group": "F", "home": "Netherlands", "away": "Japan" },
+      { "date": "2026-06-14", "group": "E", "home": "Ivory Coast", "away": "Ecuador" },
+      { "date": "2026-06-14", "group": "F", "home": "Sweden", "away": "Tunisia" },
+      { "date": "2026-06-15", "group": "H", "home": "Spain", "away": "Cape Verde" },
+      { "date": "2026-06-15", "group": "G", "home": "Belgium", "away": "Egypt" },
+      { "date": "2026-06-15", "group": "H", "home": "Saudi Arabia", "away": "Uruguay" },
+      { "date": "2026-06-15", "group": "G", "home": "Iran", "away": "New Zealand" },
+      { "date": "2026-06-16", "group": "I", "home": "France", "away": "Senegal" },
+      { "date": "2026-06-16", "group": "I", "home": "Iraq", "away": "Norway" },
+      { "date": "2026-06-16", "group": "J", "home": "Argentina", "away": "Algeria" },
+      { "date": "2026-06-16", "group": "J", "home": "Austria", "away": "Jordan" },
+      { "date": "2026-06-17", "group": "K", "home": "Portugal", "away": "DR Congo" },
+      { "date": "2026-06-17", "group": "L", "home": "England", "away": "Croatia" },
+      { "date": "2026-06-17", "group": "L", "home": "Ghana", "away": "Panama" },
+      { "date": "2026-06-17", "group": "K", "home": "Uzbekistan", "away": "Colombia" },
+      { "date": "2026-06-18", "group": "A", "home": "Czechia", "away": "South Africa" },
+      { "date": "2026-06-18", "group": "B", "home": "Switzerland", "away": "Bosnia and Herzegovina" },
+      { "date": "2026-06-18", "group": "B", "home": "Canada", "away": "Qatar" },
+      { "date": "2026-06-18", "group": "A", "home": "Mexico", "away": "South Korea" },
+      { "date": "2026-06-19", "group": "C", "home": "Brazil", "away": "Haiti" },
+      { "date": "2026-06-19", "group": "D", "home": "Türkiye", "away": "Paraguay" },
+      { "date": "2026-06-19", "group": "D", "home": "United States", "away": "Australia" },
+      { "date": "2026-06-19", "group": "C", "home": "Scotland", "away": "Morocco" },
+      { "date": "2026-06-20", "group": "F", "home": "Netherlands", "away": "Sweden" },
+      { "date": "2026-06-20", "group": "E", "home": "Germany", "away": "Ivory Coast" },
+      { "date": "2026-06-20", "group": "E", "home": "Ecuador", "away": "Curaçao" },
+      { "date": "2026-06-20", "group": "F", "home": "Tunisia", "away": "Japan" },
+      { "date": "2026-06-21", "group": "H", "home": "Spain", "away": "Saudi Arabia" },
+      { "date": "2026-06-21", "group": "G", "home": "Belgium", "away": "Iran" },
+      { "date": "2026-06-21", "group": "H", "home": "Uruguay", "away": "Cape Verde" },
+      { "date": "2026-06-21", "group": "G", "home": "New Zealand", "away": "Egypt" },
+      { "date": "2026-06-22", "group": "J", "home": "Argentina", "away": "Austria" },
+      { "date": "2026-06-22", "group": "I", "home": "France", "away": "Iraq" },
+      { "date": "2026-06-22", "group": "I", "home": "Norway", "away": "Senegal" },
+      { "date": "2026-06-22", "group": "J", "home": "Jordan", "away": "Algeria" },
+      { "date": "2026-06-23", "group": "K", "home": "Portugal", "away": "Uzbekistan" },
+      { "date": "2026-06-23", "group": "L", "home": "England", "away": "Ghana" },
+      { "date": "2026-06-23", "group": "L", "home": "Panama", "away": "Croatia" },
+      { "date": "2026-06-23", "group": "K", "home": "Colombia", "away": "DR Congo" },
+      { "date": "2026-06-24", "group": "B", "home": "Bosnia and Herzegovina", "away": "Qatar" },
+      { "date": "2026-06-24", "group": "B", "home": "Switzerland", "away": "Canada" },
+      { "date": "2026-06-24", "group": "C", "home": "Morocco", "away": "Haiti" },
+      { "date": "2026-06-24", "group": "C", "home": "Scotland", "away": "Brazil" },
+      { "date": "2026-06-24", "group": "A", "home": "Czechia", "away": "Mexico" },
+      { "date": "2026-06-24", "group": "A", "home": "South Africa", "away": "South Korea" },
+      { "date": "2026-06-25", "group": "E", "home": "Curaçao", "away": "Ivory Coast" },
+      { "date": "2026-06-25", "group": "E", "home": "Ecuador", "away": "Germany" },
+      { "date": "2026-06-25", "group": "F", "home": "Japan", "away": "Sweden" },
+      { "date": "2026-06-25", "group": "F", "home": "Tunisia", "away": "Netherlands" },
+      { "date": "2026-06-25", "group": "D", "home": "Paraguay", "away": "Australia" },
+      { "date": "2026-06-25", "group": "D", "home": "Türkiye", "away": "United States" },
+      { "date": "2026-06-26", "group": "I", "home": "Norway", "away": "France" },
+      { "date": "2026-06-26", "group": "I", "home": "Senegal", "away": "Iraq" },
+      { "date": "2026-06-26", "group": "H", "home": "Cape Verde", "away": "Saudi Arabia" },
+      { "date": "2026-06-26", "group": "H", "home": "Uruguay", "away": "Spain" },
+      { "date": "2026-06-26", "group": "G", "home": "Egypt", "away": "Iran" },
+      { "date": "2026-06-26", "group": "G", "home": "New Zealand", "away": "Belgium" },
+      { "date": "2026-06-27", "group": "L", "home": "Croatia", "away": "Ghana" },
+      { "date": "2026-06-27", "group": "L", "home": "Panama", "away": "England" },
+      { "date": "2026-06-27", "group": "K", "home": "Colombia", "away": "Portugal" },
+      { "date": "2026-06-27", "group": "K", "home": "DR Congo", "away": "Uzbekistan" },
+      { "date": "2026-06-27", "group": "J", "home": "Algeria", "away": "Austria" },
+      { "date": "2026-06-27", "group": "J", "home": "Jordan", "away": "Argentina" }
+    ]
+  },
+
+  "group_stage_tiebreakers": {
+    "_status": "VERIFY_AGAINST_OFFICIAL_FIFA_2026_REGULATIONS_PDF",
+    "_ambiguity_note": "Published 2026 explainers disagree on ordering. Most 2026-specific guides report head-to-head is applied FIRST in 2026 (a change from 2022, which applied overall goal difference first). A minority describe the older overall-first order. Both agree drawing of lots was REMOVED for 2026 and replaced by FIFA World Ranking as the final separator. Implement the ladder as an ordered, easily-swappable config so the order can be corrected once confirmed against the official PDF.",
+    "default_order_reported_for_2026": [
+      "head_to_head_points (among tied teams only)",
+      "head_to_head_goal_difference (among tied teams only)",
+      "head_to_head_goals_scored (among tied teams only)",
+      "overall_goal_difference",
+      "overall_goals_scored",
+      "fair_play_points (card deductions)",
+      "fifa_world_ranking (most recent published)"
+    ],
+    "alternate_order_older_world_cup_style": [
+      "overall_goal_difference",
+      "overall_goals_scored",
+      "head_to_head_points",
+      "head_to_head_goal_difference",
+      "head_to_head_goals_scored",
+      "fair_play_points",
+      "fifa_world_ranking"
+    ],
+    "_note_points_first": "In all versions, total POINTS is the first criterion. The lists above only kick in among teams level on points.",
+    "_three_way_tie": "When 3+ teams are level on points, the head-to-head criteria are computed over the mini-table of matches among only the tied teams, then re-applied to any still-tied subset."
+  },
+
+  "third_placed_ranking_tiebreakers": {
+    "_status": "Consistent across sources — no head-to-head (the third-placed teams never met).",
+    "purpose": "Rank the 12 third-placed teams against each other to select the 8 best, who advance to the Round of 32.",
+    "order": [
+      "points",
+      "overall_goal_difference",
+      "overall_goals_scored",
+      "fair_play_points",
+      "fifa_world_ranking (most recent published)"
+    ]
+  },
+
+  "knockout_bracket": {
+    "_note": "Fixed wiring confirmed against FIFA's published schedule. 'W##' = winner of match ##, 'L##' = loser of match ##. Round-of-32 slots that face a third-placed team carry a 'third_place_slot' code (1A,1B,1D,1E,1G,1I,1K,1L) used by the Annex C table, plus 'eligible_third_groups' (the only groups whose third can land in that slot).",
+    "round_of_32": [
+      { "match": 73, "home": "RU_A", "away": "RU_B" },
+      { "match": 74, "home": "W_E", "away": "THIRD", "third_place_slot": "1E", "eligible_third_groups": ["A","B","C","D","F"] },
+      { "match": 75, "home": "W_F", "away": "RU_C" },
+      { "match": 76, "home": "W_C", "away": "RU_F" },
+      { "match": 77, "home": "W_I", "away": "THIRD", "third_place_slot": "1I", "eligible_third_groups": ["C","D","F","G","H"] },
+      { "match": 78, "home": "RU_E", "away": "RU_I" },
+      { "match": 79, "home": "W_A", "away": "THIRD", "third_place_slot": "1A", "eligible_third_groups": ["C","E","F","H","I"] },
+      { "match": 80, "home": "W_L", "away": "THIRD", "third_place_slot": "1L", "eligible_third_groups": ["E","H","I","J","K"] },
+      { "match": 81, "home": "W_D", "away": "THIRD", "third_place_slot": "1D", "eligible_third_groups": ["B","E","F","I","J"] },
+      { "match": 82, "home": "W_G", "away": "THIRD", "third_place_slot": "1G", "eligible_third_groups": ["A","E","H","I","J"] },
+      { "match": 83, "home": "RU_K", "away": "RU_L" },
+      { "match": 84, "home": "W_H", "away": "RU_J" },
+      { "match": 85, "home": "W_B", "away": "THIRD", "third_place_slot": "1B", "eligible_third_groups": ["E","F","G","I","J"] },
+      { "match": 86, "home": "W_J", "away": "RU_H" },
+      { "match": 87, "home": "W_K", "away": "THIRD", "third_place_slot": "1K", "eligible_third_groups": ["D","E","I","J","L"] },
+      { "match": 88, "home": "RU_D", "away": "RU_G" }
+    ],
+    "round_of_16": [
+      { "match": 89, "home": "W74", "away": "W77" },
+      { "match": 90, "home": "W73", "away": "W75" },
+      { "match": 91, "home": "W76", "away": "W78" },
+      { "match": 92, "home": "W79", "away": "W80" },
+      { "match": 93, "home": "W83", "away": "W84" },
+      { "match": 94, "home": "W81", "away": "W82" },
+      { "match": 95, "home": "W86", "away": "W88" },
+      { "match": 96, "home": "W85", "away": "W87" }
+    ],
+    "quarter_finals": [
+      { "match": 97, "home": "W89", "away": "W90" },
+      { "match": 98, "home": "W93", "away": "W94" },
+      { "match": 99, "home": "W91", "away": "W92" },
+      { "match": 100, "home": "W95", "away": "W96" }
+    ],
+    "semi_finals": [
+      { "match": 101, "home": "W97", "away": "W98" },
+      { "match": 102, "home": "W99", "away": "W100" }
+    ],
+    "third_place_playoff": { "match": 103, "home": "L101", "away": "L102" },
+    "final": { "match": 104, "home": "W101", "away": "W102" }
+  },
+
+  "third_place_combination_table": {
+    "_status": "INCOMPLETE — SAMPLE FORMAT ONLY. The full FIFA Annex C table has 495 rows (12 groups choose 8). DO NOT fabricate the missing rows. Load the complete table from the official source below before relying on third-place assignment.",
+    "source": "FIFA 2026 World Cup Regulations, Annex C. The full 495-row table is also reproduced at https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_knockout_stage (section 'Combinations of matches in the round of 32').",
+    "column_order": ["1A", "1B", "1D", "1E", "1G", "1I", "1K", "1L"],
+    "how_it_works": "Determine which 8 of the 12 groups produced a qualifying third-placed team. Sort those 8 group letters, look up the matching row, and read off which group's third (e.g. '3E') is assigned to each winner slot. '1A' is the third-placed opponent in match 79, '1B' -> match 85, '1D' -> match 81, '1E' -> match 74, '1G' -> match 82, '1I' -> match 77, '1K' -> match 87, '1L' -> match 80.",
+    "sample_rows_NOT_COMPLETE": [
+      { "qualifying_third_groups": ["E","F","G","H","I","J","K","L"], "assignment": { "1A": "3E", "1B": "3J", "1D": "3I", "1E": "3F", "1G": "3H", "1I": "3G", "1K": "3L", "1L": "3K" } },
+      { "qualifying_third_groups": ["D","F","G","H","I","J","K","L"], "assignment": { "1A": "3H", "1B": "3G", "1D": "3I", "1E": "3D", "1G": "3J", "1I": "3F", "1K": "3L", "1L": "3K" } },
+      { "qualifying_third_groups": ["D","E","G","H","I","J","K","L"], "assignment": { "1A": "3E", "1B": "3J", "1D": "3I", "1E": "3D", "1G": "3H", "1I": "3G", "1K": "3L", "1L": "3K" } }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "tournament": "2026 FIFA World Cup",
+  "format": {
+    "group_stage": {
+      "num_groups": 12,
+      "teams_per_group": 4,
+      "matches_per_team": 3,
+      "advancement": { "winners": 12, "runners_up": 12, "best_thirds": 8 }
+    },
+    "knockout_rounds": ["round_of_32", "round_of_16", "quarter_finals", "semi_finals", "third_place_playoff", "final"],
+    "match_id_range": { "group_stage": [1, 72], "knockout": [73, 104] }
+  },
+  "tiebreaker_config": {
+    "group_stage": {
+      "_note": "Swap entries here to change order without touching logic. Overall points always applied first before this list.",
+      "default_order": [
+        "head_to_head_points",
+        "head_to_head_goal_difference",
+        "head_to_head_goals_scored",
+        "overall_goal_difference",
+        "overall_goals_scored",
+        "fair_play_points",
+        "fifa_world_ranking"
+      ]
+    },
+    "third_place_ranking": {
+      "order": [
+        "points",
+        "overall_goal_difference",
+        "overall_goals_scored",
+        "fair_play_points",
+        "fifa_world_ranking"
+      ]
+    }
+  }
+}
