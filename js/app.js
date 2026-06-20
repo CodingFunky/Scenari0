@@ -4,6 +4,7 @@ import { getState, subscribe, resetState, applySyncedScores,
 import { fetchFinishedMatches, computeSyncUpdates } from './sync.js';
 import { simulateRemaining } from './sim.js';
 import { loadOdds } from './odds.js';
+import { DEFAULT_PROXY_URL } from './config.js';
 import { renderGroupStage } from './ui/group-stage.js';
 import { renderBracket }    from './ui/bracket.js';
 
@@ -144,13 +145,19 @@ function setupResets() {
 
 const PROXY_KEY = 'sync_proxy_url';
 
+// Resolve the proxy URL: a user override (localStorage) wins, else the baked-in
+// default so a freshly-shared copy works without any setup.
+function getProxyUrl() {
+  return (localStorage.getItem(PROXY_KEY) || DEFAULT_PROXY_URL).trim();
+}
+
 function setupSync() {
   const btn = document.getElementById('sync-btn');
   const proxyInput = document.getElementById('proxy-url');
   if (!btn) return;
 
   if (proxyInput) {
-    proxyInput.value = localStorage.getItem(PROXY_KEY) || '';
+    proxyInput.value = localStorage.getItem(PROXY_KEY) || DEFAULT_PROXY_URL;
     proxyInput.addEventListener('change', () => {
       localStorage.setItem(PROXY_KEY, proxyInput.value.trim());
     });
@@ -160,8 +167,7 @@ function setupSync() {
 }
 
 async function runSync(btn) {
-  const proxy = (localStorage.getItem(PROXY_KEY)
-    || document.getElementById('proxy-url')?.value || '').trim();
+  const proxy = getProxyUrl();
 
   if (!proxy) {
     setSyncStatus('error', 'Set your proxy URL in ⚙ first');
@@ -238,7 +244,7 @@ async function runSimulation(btn) {
   try {
     let oddsByPair = null, oddsNote = '';
     if (document.getElementById('use-odds-toggle')?.checked) {
-      const proxy = (localStorage.getItem('sync_proxy_url') || '').trim();
+      const proxy = getProxyUrl();
       try {
         oddsByPair = await loadOdds(proxy);
         const n = oddsByPair ? Object.keys(oddsByPair).length : 0;
