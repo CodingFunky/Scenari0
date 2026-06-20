@@ -2,3 +2,7 @@
 Thumbs.db
 node_modules/
 *.log
+
+# Cloudflare wrangler local cache / state (contains account info)
+.wrangler/
+proxy/.wrangler/

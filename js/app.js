@@ -1,5 +1,6 @@
 import { deriveAll } from './engine.js';
-import { getState, subscribe, resetState } from './state.js';
+import { getState, subscribe, resetState, applySyncedScores } from './state.js';
+import { fetchFinishedMatches, computeSyncUpdates } from './sync.js';
 import { renderGroupStage } from './ui/group-stage.js';
 import { renderBracket }    from './ui/bracket.js';
 
@@ -21,6 +22,7 @@ async function init() {
   setupTabs();
   setupHighlight();
   setupReset();
+  setupSync();
 
   subscribe(render);
   render(getState());
@@ -125,6 +127,72 @@ function setupReset() {
       resetState();
     }
   });
+}
+
+// ─── Sync results from football-data.org (via proxy) ─────────────────────────
+
+const PROXY_KEY = 'sync_proxy_url';
+
+function setupSync() {
+  const btn = document.getElementById('sync-btn');
+  const proxyInput = document.getElementById('proxy-url');
+  if (!btn) return;
+
+  if (proxyInput) {
+    proxyInput.value = localStorage.getItem(PROXY_KEY) || '';
+    proxyInput.addEventListener('change', () => {
+      localStorage.setItem(PROXY_KEY, proxyInput.value.trim());
+    });
+  }
+
+  btn.addEventListener('click', () => runSync(btn));
+}
+
+async function runSync(btn) {
+  const proxy = (localStorage.getItem(PROXY_KEY)
+    || document.getElementById('proxy-url')?.value || '').trim();
+
+  if (!proxy) {
+    setSyncStatus('error', 'Set your proxy URL in ⚙ first');
+    const details = document.querySelector('.sync-settings');
+    if (details) details.open = true;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  setSyncStatus('loading', 'Syncing…');
+
+  try {
+    const { fixtures, cached } = await fetchFinishedMatches(proxy);
+    const schedule = DATA.group_stage_schedule.matches;
+    const { updates, report } = computeSyncUpdates(fixtures, schedule, getState().scores);
+    const n = applySyncedScores(updates); // triggers recompute of standings + bracket
+
+    let msg = `Synced ${n} match${n === 1 ? '' : 'es'}`;
+    const extras = [];
+    if (report.skippedLocked)   extras.push(`${report.skippedLocked} locked`);
+    if (report.alreadyCurrent)  extras.push(`${report.alreadyCurrent} unchanged`);
+    if (report.unmatched.length) extras.push(`${report.unmatched.length} unmatched`);
+    if (cached)                  extras.push('cached — live fetch failed');
+    if (extras.length) msg += ` · ${extras.join(', ')}`;
+
+    setSyncStatus(cached ? 'error' : 'success', msg);
+    if (report.unmatched.length) console.warn('Sync: unmatched fixtures:', report.unmatched);
+  } catch (err) {
+    setSyncStatus('error', `Sync failed: ${err.message}`);
+    console.error('Sync error:', err);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+}
+
+function setSyncStatus(kind, text) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.className = `sync-status ${kind}`;
+  el.textContent = text;
 }
 
 init().catch(err => {
