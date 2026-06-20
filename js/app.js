@@ -38,24 +38,16 @@ async function init() {
 function render(state) {
   const derived = deriveAll(state, DATA, RANKINGS);
 
-  // Preserve focus across re-renders (so score inputs don't lose focus on each keystroke)
-  const active = document.activeElement;
-  const focusKey = active?.dataset?.matchIdx && active?.dataset?.side
-    ? `${active.dataset.matchIdx}:${active.dataset.side}`
-    : null;
+  // Group stage updates in place (inputs are never recreated → focus/caret/scroll
+  // are preserved naturally). The bracket still does a full rebuild, so capture
+  // scroll and restore it afterward to avoid jumping when clicking picks.
+  const scrollY = window.scrollY;
 
   renderGroupStage(document.getElementById('group-stage-content'), derived, highlightTeam);
   renderBracket(document.getElementById('bracket-content'), derived, highlightTeam);
-
-  if (focusKey) {
-    const [idx, side] = focusKey.split(':');
-    const el = document.querySelector(
-      `.score-input[data-match-idx="${idx}"][data-side="${side}"]`
-    );
-    if (el) { el.focus(); el.value = el.value; } // re-focus + move cursor to end
-  }
-
   updateThirdsPanel(derived);
+
+  if (window.scrollY !== scrollY) window.scrollTo(0, scrollY);
 }
 
 // ─── Thirds info panel ───────────────────────────────────────────────────────
