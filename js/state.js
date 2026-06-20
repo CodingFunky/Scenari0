@@ -20,12 +20,24 @@ export function setScore(matchIdx, side, goals) {
   if (goals === null || goals === undefined || goals === '') {
     const updated = { ...existing };
     delete updated[side];
-    if (Object.keys(updated).length === 0) delete scores[matchIdx];
-    else scores[matchIdx] = updated;
+    // A remaining partial is still a user edit → mark manual (locked from sync).
+    if (updated.h === undefined && updated.a === undefined) delete scores[matchIdx];
+    else scores[matchIdx] = { ...updated, src: 'manual' };
   } else {
-    scores[matchIdx] = { ...existing, [side]: Number(goals) };
+    // User-typed results are manual, so Sync will never overwrite them.
+    scores[matchIdx] = { ...existing, [side]: Number(goals), src: 'manual' };
   }
   setState({ scores });
+}
+
+// Batch-apply synced results (from sync.js) in one update → one re-render.
+// `updates` is { [matchIdx]: { h, a, src: 'api' } }. Returns count applied.
+export function applySyncedScores(updates) {
+  const keys = updates ? Object.keys(updates) : [];
+  if (keys.length === 0) return 0;
+  const scores = { ..._state.scores, ...updates };
+  setState({ scores });
+  return keys.length;
 }
 
 export function setPick(matchId, slot) {

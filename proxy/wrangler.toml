@@ -1,0 +1,7 @@
+name = "worldcup-proxy"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# The API key is set as a SECRET, not here:
+#   wrangler secret put API_FOOTBALL_KEY
+# Never commit the key to this file or the repo.

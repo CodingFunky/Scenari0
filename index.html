@@ -19,6 +19,24 @@
           <input id="highlight-input" type="text" placeholder="e.g. United States" autocomplete="off">
           <button id="highlight-clear" title="Clear">✕</button>
         </div>
+
+        <div class="sync-group">
+          <details class="sync-settings">
+            <summary title="Sync settings">⚙</summary>
+            <div class="sync-settings-body">
+              <label for="proxy-url">Sync proxy URL</label>
+              <input id="proxy-url" type="url" autocomplete="off"
+                     placeholder="https://worldcup-proxy.xxx.workers.dev">
+              <p class="sync-hint">Deploy <code>proxy/worker.js</code> to Cloudflare,
+                then paste its URL here. Your API key stays on the proxy, never in the browser.</p>
+            </div>
+          </details>
+          <button id="sync-btn" class="btn-sync" title="Pull finished results from API-Football">
+            <span class="sync-icon">⟳</span> Sync Results
+          </button>
+          <span id="sync-status" class="sync-status"></span>
+        </div>
+
         <button id="reset-btn" class="btn-reset">Reset All</button>
       </div>
     </div>
