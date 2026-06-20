@@ -1,27 +1,27 @@
-// Cloudflare Worker — API-Football proxy for Scenari0.
+// Cloudflare Worker — football-data.org proxy for Scenari0.
 //
 // Why this exists: the app is a static client-side site, so it has no server
 // and no env vars. Putting the API key in browser JS would expose it publicly,
-// and api-sports.io blocks direct browser calls (CORS). This Worker holds the
-// key in a real server-side secret, injects it as the request header, and adds
-// CORS headers so the browser app can call it.
+// and football-data.org doesn't send permissive CORS headers for browsers.
+// This Worker holds the key in a real server-side secret, injects it as the
+// X-Auth-Token header, and adds CORS headers so the browser app can call it.
 //
 // Deploy (CLI):
 //   npm i -g wrangler
 //   wrangler login
-//   wrangler secret put API_FOOTBALL_KEY   # paste your key when prompted
+//   wrangler secret put FOOTBALL_DATA_KEY   # paste your key when prompted
 //   wrangler deploy
 // Then paste the resulting https://<name>.<subdomain>.workers.dev URL into the
 // app's  ⚙ Sync settings  field.
 //
 // (Dashboard alternative: Cloudflare dashboard → Workers → Create → paste this
-//  file → Settings → Variables → add encrypted var API_FOOTBALL_KEY.)
+//  file → Settings → Variables → add encrypted var FOOTBALL_DATA_KEY.)
 
-const UPSTREAM = 'https://v3.football.api-sports.io';
+const UPSTREAM = 'https://api.football-data.org/v4';
 
 // Only let the key be used for these paths, so a leaked proxy URL can't be
 // abused to drain your API quota on arbitrary endpoints.
-const ALLOWED_PATHS = ['/fixtures', '/status'];
+const ALLOWED_PATHS = ['/competitions'];
 
 // Tighten this to your GitHub Pages origin in production,
 // e.g. 'https://yourname.github.io'.
@@ -42,8 +42,8 @@ export default {
     );
     if (!allowed) return json({ error: 'Path not allowed' }, 403);
 
-    if (!env.API_FOOTBALL_KEY) {
-      return json({ error: 'Proxy is missing the API_FOOTBALL_KEY secret' }, 500);
+    if (!env.FOOTBALL_DATA_KEY) {
+      return json({ error: 'Proxy is missing the FOOTBALL_DATA_KEY secret' }, 500);
     }
 
     const upstreamUrl = UPSTREAM + url.pathname + url.search;
@@ -51,9 +51,8 @@ export default {
     try {
       upstreamRes = await fetch(upstreamUrl, {
         headers: {
-          // Direct api-sports.io uses this header. If you switch to the RapidAPI
-          // gateway, change UPSTREAM and use 'X-RapidAPI-Key' instead.
-          'x-apisports-key': env.API_FOOTBALL_KEY,
+          // football-data.org authenticates with this header.
+          'X-Auth-Token': env.FOOTBALL_DATA_KEY,
           'Accept': 'application/json',
         },
       });

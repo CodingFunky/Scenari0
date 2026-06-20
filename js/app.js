@@ -129,7 +129,7 @@ function setupReset() {
   });
 }
 
-// ─── Sync results from API-Football (via proxy) ──────────────────────────────
+// ─── Sync results from football-data.org (via proxy) ─────────────────────────
 
 const PROXY_KEY = 'sync_proxy_url';
 
@@ -164,7 +164,7 @@ async function runSync(btn) {
   setSyncStatus('loading', 'Syncing…');
 
   try {
-    const fixtures = await fetchFinishedMatches(proxy);
+    const { fixtures, cached } = await fetchFinishedMatches(proxy);
     const schedule = DATA.group_stage_schedule.matches;
     const { updates, report } = computeSyncUpdates(fixtures, schedule, getState().scores);
     const n = applySyncedScores(updates); // triggers recompute of standings + bracket
@@ -174,9 +174,10 @@ async function runSync(btn) {
     if (report.skippedLocked)   extras.push(`${report.skippedLocked} locked`);
     if (report.alreadyCurrent)  extras.push(`${report.alreadyCurrent} unchanged`);
     if (report.unmatched.length) extras.push(`${report.unmatched.length} unmatched`);
+    if (cached)                  extras.push('cached — live fetch failed');
     if (extras.length) msg += ` · ${extras.join(', ')}`;
 
-    setSyncStatus('success', msg);
+    setSyncStatus(cached ? 'error' : 'success', msg);
     if (report.unmatched.length) console.warn('Sync: unmatched fixtures:', report.unmatched);
   } catch (err) {
     setSyncStatus('error', `Sync failed: ${err.message}`);

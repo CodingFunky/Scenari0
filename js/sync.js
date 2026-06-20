@@ -1,8 +1,14 @@
 import { normalizeTeam } from './teams.js';
 
-const LEAGUE_ID = 1;      // FIFA World Cup in API-Football
-const SEASON = 2026;
-const FINISHED = new Set(['FT', 'AET', 'PEN']); // api-sports "finished" short codes
+// football-data.org v4. World Cup competition code is "WC"; override at runtime
+// via localStorage 'sync_competition' if the code differs (section C).
+const DEFAULT_COMPETITION = 'WC';
+const CACHE_KEY = 'sync_cache_matches';
+
+function competitionCode() {
+  try { return localStorage.getItem('sync_competition') || DEFAULT_COMPETITION; }
+  catch { return DEFAULT_COMPETITION; }
+}
 
 // ─── Pure helpers (no network — unit-testable) ───────────────────────────────
 
@@ -15,15 +21,19 @@ export function buildPairIndex(schedule) {
   return idx;
 }
 
-// Convert raw api-sports `response[]` items into simplified fixture records.
-export function parseFixtures(responseArray) {
-  return (responseArray || []).map(item => ({
-    fixtureId: item.fixture?.id ?? null,
-    statusShort: item.fixture?.status?.short ?? '',
-    home: item.teams?.home?.name ?? '',
-    away: item.teams?.away?.name ?? '',
-    homeScore: item.goals?.home,
-    awayScore: item.goals?.away,
+// Convert football-data.org `matches[]` items into simplified fixture records.
+//   match.status            -> status   ('FINISHED' when full-time)
+//   match.homeTeam.name     -> home
+//   match.awayTeam.name     -> away
+//   match.score.fullTime.*  -> homeScore / awayScore
+export function parseFixtures(matchesArray) {
+  return (matchesArray || []).map(m => ({
+    fixtureId: m.id ?? null,
+    status: m.status ?? '',
+    home: m.homeTeam?.name ?? '',
+    away: m.awayTeam?.name ?? '',
+    homeScore: m.score?.fullTime?.home,
+    awayScore: m.score?.fullTime?.away,
   }));
 }
 
@@ -31,7 +41,7 @@ export function parseFixtures(responseArray) {
 // compute which scores to write. Pure: returns { updates, report }, no mutation.
 //
 // Rules (satisfy the task constraints):
-//  - only finished fixtures with both scores present are considered
+//  - only FINISHED fixtures with both scores present are considered
 //  - manual (user-typed) results are LOCKED — never overwritten
 //  - empty matches, or matches previously filled by a prior sync, get written
 //  - re-writing identical api data is a no-op (idempotent)
@@ -43,7 +53,7 @@ export function computeSyncUpdates(fixtures, schedule, currentScores) {
   };
 
   for (const f of fixtures) {
-    if (!FINISHED.has(f.statusShort) || f.homeScore == null || f.awayScore == null) {
+    if (f.status !== 'FINISHED' || f.homeScore == null || f.awayScore == null) {
       report.notFinished++;
       continue;
     }
@@ -79,29 +89,42 @@ export function computeSyncUpdates(fixtures, schedule, currentScores) {
 
 // ─── Network ──────────────────────────────────────────────────────────────────
 
-// Fetch every World Cup fixture via the proxy, following pagination.
-// Returns parsed fixture records (all statuses; filtering happens in the merge).
+function readCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+// Fetch finished World Cup matches via the proxy.
+// Returns { fixtures, cached }. On failure or empty/restricted scope, falls back
+// to the last cached matches if any exist (section F); only throws when the
+// fetch fails AND there is no cache — so the sync loop never crashes silently.
 export async function fetchFinishedMatches(proxyBase) {
   if (!proxyBase) throw new Error('No proxy URL configured');
   const base = proxyBase.replace(/\/+$/, '');
-  const all = [];
-  let page = 1, totalPages = 1;
+  const url = `${base}/competitions/${competitionCode()}/matches?status=FINISHED`;
 
-  do {
-    const url = `${base}/fixtures?league=${LEAGUE_ID}&season=${SEASON}&page=${page}`;
+  try {
     const res = await fetch(url, { headers: { Accept: 'application/json' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-
-    const json = await res.json();
-    const errs = json.errors;
-    if (errs && !Array.isArray(errs) && Object.keys(errs).length) {
-      throw new Error('API error: ' + JSON.stringify(errs));
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}${body ? ' — ' + body.slice(0, 200) : ''}`);
     }
-
-    all.push(...parseFixtures(json.response));
-    totalPages = json.paging?.total ?? 1;
-    page++;
-  } while (page <= totalPages);
-
-  return all;
+    const json = await res.json();
+    const matches = json.matches ?? [];
+    if (matches.length) {
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(matches)); } catch {}
+    }
+    return { fixtures: parseFixtures(matches), cached: false };
+  } catch (err) {
+    const cached = readCache();
+    if (cached) {
+      console.warn('Sync: live fetch failed, using cached matches —', err.message);
+      return { fixtures: parseFixtures(cached), cached: true };
+    }
+    throw err; // nothing cached → surface the error to the user
+  }
 }

@@ -1,4 +1,4 @@
-// Team-name normalization: reconcile API-Football names with our local data.
+// Team-name normalization: reconcile football-data.org names with our local data.
 //
 // We have no external match IDs, so we join API fixtures to local matches by
 // their (home, away) team pair. That requires names to reconcile across sources.
@@ -17,7 +17,10 @@ const ALIASES = {
   democraticrepublicofcongo: 'drcongo',
   cotedivoire: 'ivorycoast',
   bosnia: 'bosniaandherzegovina',
+  bosniaherzegovina: 'bosniaandherzegovina',  // football-data.org spelling
   capeverdeislands: 'capeverde',
+  caboverde: 'capeverde',                     // football-data.org spelling
+  iriran: 'iran',                             // FIFA / football-data.org spelling
 };
 
 export function normalizeTeam(name) {
