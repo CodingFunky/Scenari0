@@ -1,38 +1,90 @@
 import { setScore } from '../state.js';
 
-// Renders all 12 group cards into `container`.
-// Called on every state change; does a full re-render (fast enough at this scale).
+// Renders all 12 group cards. The structure (teams, fixtures, inputs) is static,
+// so we BUILD the DOM once, then UPDATE only the derived bits (standings, input
+// values, highlights) in place. Crucially, the score inputs are never recreated
+// — so typing never loses focus/caret/scroll (or dismisses the mobile keyboard).
 export function renderGroupStage(container, derived, highlightTeam) {
+  if (container.dataset.built === '1') {
+    updateGroupStage(container, derived, highlightTeam);
+  } else {
+    buildGroupStage(container, derived, highlightTeam);
+  }
+}
+
+// ─── Build (once) ─────────────────────────────────────────────────────────────
+
+function buildGroupStage(container, derived, highlightTeam) {
   const { groupData, qualifiedGroups } = derived;
   const qualSet = new Set(qualifiedGroups);
 
   let html = '<div class="groups-grid">';
-
   for (const [gid, gd] of Object.entries(groupData)) {
     html += renderGroupCard(gid, gd, qualSet, highlightTeam);
   }
-
   html += '</div>';
   container.innerHTML = html;
+  container.dataset.built = '1';
 
-  // Wire score inputs (after DOM is set)
-  container.querySelectorAll('.score-input').forEach(input => {
-    input.addEventListener('input', handleScoreInput);
-    input.addEventListener('change', handleScoreInput);
-  });
+  // Delegated handlers: inputs persist across updates, but delegation keeps this
+  // robust regardless and avoids re-wiring.
+  container.addEventListener('input', onScoreEvent);
+  container.addEventListener('change', onScoreEvent);
 }
 
-function handleScoreInput(e) {
-  const { matchIdx, side } = e.target.dataset;
-  const raw = e.target.value.trim();
+function onScoreEvent(e) {
+  const t = e.target;
+  if (!t.classList || !t.classList.contains('score-input')) return;
+  const { matchIdx, side } = t.dataset;
+  const raw = t.value.trim();
   const val = raw === '' ? null : parseInt(raw, 10);
   setScore(Number(matchIdx), side, isNaN(val) ? null : val);
 }
 
+// ─── Update (every state change) ──────────────────────────────────────────────
+
+function updateGroupStage(container, derived, highlightTeam) {
+  const { groupData, qualifiedGroups } = derived;
+  const qualSet = new Set(qualifiedGroups);
+  const active = document.activeElement;
+
+  for (const [gid, gd] of Object.entries(groupData)) {
+    // Standings table body — not focusable, fixed height, cheap to replace.
+    const tbody = container.querySelector(`.standings-table[data-group="${gid}"] tbody`);
+    if (tbody) {
+      tbody.innerHTML = gd.standings
+        .map((s, i) => renderStandingRow(s, i, gid, qualSet, highlightTeam))
+        .join('');
+    }
+
+    // Reflect score values from state into the inputs — but never touch the one
+    // the user is currently typing in (that would move the caret).
+    for (const m of gd.matches) {
+      syncInputValue(container, m.idx, 'h', m.homeGoals, active);
+      syncInputValue(container, m.idx, 'a', m.awayGoals, active);
+    }
+  }
+
+  // "Follow team" highlight on the fixture rows.
+  container.querySelectorAll('.match-team').forEach(el => {
+    el.classList.toggle('hl', highlightTeam != null && el.textContent === highlightTeam);
+  });
+}
+
+function syncInputValue(container, idx, side, goals, active) {
+  const input = container.querySelector(
+    `.score-input[data-match-idx="${idx}"][data-side="${side}"]`
+  );
+  if (!input || input === active) return;
+  const v = goals !== null && goals !== undefined ? String(goals) : '';
+  if (input.value !== v) input.value = v;
+}
+
+// ─── Markup helpers ───────────────────────────────────────────────────────────
+
 function renderGroupCard(gid, gd, qualSet, highlightTeam) {
   const { standings, matches } = gd;
 
-  // Group matches by date (= matchday)
   const byDate = {};
   for (const m of matches) {
     byDate[m.date] = byDate[m.date] ?? [];
@@ -44,7 +96,7 @@ function renderGroupCard(gid, gd, qualSet, highlightTeam) {
 <div class="group-card">
   <h2 class="group-title">Group ${gid}</h2>
 
-  <table class="standings-table">
+  <table class="standings-table" data-group="${gid}">
     <thead>
       <tr><th class="col-team">Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr>
     </thead>

@@ -2,6 +2,18 @@ name = "worldcup-proxy"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
-# The API key is set as a SECRET, not here:
+# The API keys are set as SECRETS, not here:
 #   wrangler secret put FOOTBALL_DATA_KEY
-# Never commit the key to this file or the repo.
+#   wrangler secret put ODDS_API_KEY
+# Never commit a key to this file or the repo.
+
+# Per-IP rate limit (Cloudflare Rate Limiting binding).
+# limit = max requests per `period` seconds, per IP+route. period must be 10 or 60.
+# Tune `limit` down to be stricter. namespace_id is a positive integer (as a string), unique in your account.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+
+[ratelimits.simple]
+limit = 6
+period = 60
