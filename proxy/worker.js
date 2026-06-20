@@ -52,6 +52,20 @@ export default {
     );
     if (!route) return json({ error: 'Path not allowed' }, 403);
 
+    // Per-IP rate limit (Cloudflare Rate Limiting binding). Enforced before any
+    // upstream call, so over-limit requests never touch your API quota. Keyed by
+    // IP + route so a burst on one provider doesn't block the other. Guarded so
+    // the Worker still runs if the binding isn't configured. Best-effort per
+    // Cloudflare data center. NOTE: this caps a single visitor — it does NOT
+    // enforce a global monthly budget (that's the KV-counter approach).
+    if (env.RATE_LIMITER) {
+      const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+      const { success } = await env.RATE_LIMITER.limit({ key: `${ip}:${route.prefix}` });
+      if (!success) {
+        return json({ error: 'Rate limit exceeded — please wait a minute and try again.' }, 429);
+      }
+    }
+
     const key = env[route.secret];
     if (!key) return json({ error: `Proxy is missing the ${route.secret} secret` }, 500);
 

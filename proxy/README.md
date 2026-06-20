@@ -59,6 +59,23 @@ wired correctly. A `{"error":"Proxy is missing the FOOTBALL_DATA_KEY secret"}`
 means the secret isn't set; `403`/restricted means your plan doesn't include
 that competition.
 
+## Rate limiting
+
+The Worker enforces a **per-IP rate limit** via Cloudflare's Rate Limiting
+binding (configured in [`wrangler.toml`](wrangler.toml)) — currently
+**6 requests/minute per IP per route**. Over-limit requests get a `429` *before*
+any upstream call, so they never spend your API quota. The app handles `429`
+gracefully (falls back to cached results / shows a "wait a minute" message).
+
+- Tune the cap by editing `simple = { limit = 6, period = 60 }` in `wrangler.toml`
+  (`period` must be `10` or `60`), then `wrangler deploy`.
+- This caps a single visitor. It does **not** enforce a global monthly budget
+  (e.g. The Odds API's 500/mo across all users) — that needs a KV-counter
+  approach, which can be added later.
+- If `wrangler deploy` rejects the binding on your plan, the fallback is a
+  Cloudflare dashboard **Rate Limiting rule** (Security → WAF) targeting the
+  Worker route; remove the `[[unsafe.bindings]]` block in that case.
+
 ## Notes
 
 - The app requests `/competitions/WC/matches?status=FINISHED`. World Cup's code
