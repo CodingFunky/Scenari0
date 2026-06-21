@@ -286,12 +286,13 @@ main { padding: 0; }
 .bracket-rounds {
   display: flex;
   gap: 0;
-  min-width: 1200px;
-  align-items: flex-start;
+  min-width: 0;
+  align-items: stretch; /* all columns share the Round-of-32 height so the tree lines up */
 }
 
+/* Fixed-width columns so the bracket doesn't stretch to fill wide screens. */
 .bracket-round {
-  flex: 1;
+  flex: 0 0 185px;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border);
@@ -308,6 +309,7 @@ main { padding: 0; }
   background: var(--bg-card2);
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
+  text-align: center;
 }
 
 .round-matches {
@@ -316,13 +318,37 @@ main { padding: 0; }
   justify-content: space-around;
   padding: 8px 0;
   flex: 1;
-  min-height: 1160px; /* 16 matches × ~72px = consistent column height */
+  min-height: 0; /* let the Round-of-32 column define the height; others stretch to it */
 }
 
 /* Final column needs two groups (Final + 3PP) stacked */
 .final-col {
   justify-content: space-evenly;
 }
+
+/* Two-sided layout (desktop): left half flows toward the center, right half
+   mirrors it, and the final sits in the middle. Each .bracket-side stretches its
+   columns to equal height so the existing space-around tree alignment holds. */
+.bracket-two-sided {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+}
+.bracket-side {
+  display: flex;
+  align-items: stretch;
+}
+/* The :last-child rule strips the border off the last column of each side; the
+   left side's last column (Semifinal) needs its divider back, toward the center. */
+.bracket-side.left .bracket-round:last-child { border-right: 1px solid var(--border); }
+/* Scaled to fit the window — keep the transform anchored top-left. */
+.bracket-two-sided { transform-origin: top left; }
+/* Center column: the final sits at the vertical middle where the two semifinals
+   meet; the 3rd-place match is pulled out of flow to the bottom so it doesn't
+   shift the final off-center. */
+.bracket-center { position: relative; }
+.bracket-center .center-final { justify-content: center; }
+.center-third { position: absolute; left: 0; right: 0; bottom: 0; }
 
 .bracket-half-divider {
   height: 1px;
@@ -359,6 +385,7 @@ main { padding: 0; }
 .bracket-team {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 6px 8px;
   gap: 6px;
   transition: background 0.1s;
@@ -370,7 +397,7 @@ main { padding: 0; }
 .bracket-team.placeholder { cursor: default; }
 .placeholder .team-name { color: var(--text-dim); font-style: italic; font-size: 11px; }
 
-.team-name { font-size: 12px; color: var(--text); }
+.team-name { font-size: 12px; color: var(--text); text-align: center; white-space: nowrap; }
 
 .bracket-team.winner { background: var(--winner-bg); }
 .bracket-team.winner .team-name { color: #3fb950; font-weight: 700; }
@@ -703,4 +730,26 @@ main { padding: 0; }
   }
   .bracket-scroll { padding: 8px; }
   #thirds-panel { padding-left: 0; }
+
+  /* Bracket: a proper (condensed) tournament tree. Boxes hug their longest name
+     instead of a fixed width, and each later round self-distributes so its
+     matches sit centered between the two feeders that lead into them — driven by
+     all columns stretching to the (now shorter) Round of 32 height + space-around. */
+  .bracket-rounds { min-width: 0; align-items: stretch; }
+  .bracket-round { flex: 0 0 auto; }
+  .round-matches,
+  .round-matches.final-col {
+    min-height: 0;
+    flex: 1;
+    justify-content: space-around;
+    align-items: flex-start;
+    gap: 0;
+    padding: 2px 0;
+  }
+  .bracket-match { width: 145px; min-width: 0; margin: 3px 6px; }
+  .bracket-team { min-height: 18px; padding: 3px 7px; }
+  .team-name { font-size: 11px; }
+  .placeholder .team-name { font-size: 10px; }
+  .match-label { font-size: 9px; padding: 0 6px; }
+  .round-label { padding: 6px 8px; font-size: 10px; }
 }
