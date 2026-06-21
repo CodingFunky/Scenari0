@@ -1,4 +1,5 @@
 import { setScore } from '../state.js';
+import { flagHtml } from '../flags.js';
 
 // Renders all 12 group cards. The structure (teams, fixtures, inputs) is static,
 // so we BUILD the DOM once, then UPDATE only the derived bits (standings, input
@@ -126,7 +127,7 @@ function renderStandingRow(s, rank, gid, qualSet, highlightTeam) {
   const hl = highlightTeam && s.team === highlightTeam ? ' row-highlight' : '';
   return `
 <tr class="${cls}${hl}">
-  <td class="col-team">${s.team}</td>
+  <td class="col-team"><span class="team-cell">${flagHtml(s.team)}<span>${s.team}</span></span></td>
   <td>${s.played}</td>
   <td>${s.w}</td>
   <td>${s.d}</td>
@@ -146,13 +147,13 @@ function renderMatchInput(m, highlightTeam) {
 
   return `
 <div class="match-row">
-  <span class="match-team home${hHl}">${m.home}</span>
+  <span class="match-team home${hHl}">${flagHtml(m.home)}${m.home}</span>
   <input class="score-input" type="number" min="0" max="20" value="${hVal}"
     data-match-idx="${m.idx}" data-side="h" placeholder="–">
   <span class="score-sep">:</span>
   <input class="score-input" type="number" min="0" max="20" value="${aVal}"
     data-match-idx="${m.idx}" data-side="a" placeholder="–">
-  <span class="match-team away${aHl}">${m.away}</span>
+  <span class="match-team away${aHl}">${flagHtml(m.away)}${m.away}</span>
 </div>`;
 }
 

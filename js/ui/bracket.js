@@ -1,4 +1,5 @@
 import { setPick, clearMatch } from '../state.js';
+import { flagHtml } from '../flags.js';
 
 // Visual order of matches within each round (top→bottom) to align the bracket tree.
 // The first half of each array feeds Semifinal 101, the second half feeds 102 —
@@ -152,12 +153,12 @@ function renderBracketMatch(id, m, highlightTeam, overrideLabel) {
 <div class="bracket-match" data-match="${id}">
   <div class="bracket-team ${homeCls} ${homeClickable}"
        data-match-id="${id}" data-side="h" data-current-pick="${pick ?? ''}">
-    <span class="team-name">${m.home}</span>
+    <span class="team-name">${flagHtml(m.home)}${m.home}</span>
   </div>
   <div class="match-label">${label}</div>
   <div class="bracket-team ${awayCls} ${awayClickable}"
        data-match-id="${id}" data-side="a" data-current-pick="${pick ?? ''}">
-    <span class="team-name">${m.away}</span>
+    <span class="team-name">${flagHtml(m.away)}${m.away}</span>
   </div>
 </div>`;
 }
