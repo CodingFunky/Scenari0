@@ -719,7 +719,7 @@ main { padding: 0; }
     gap: 0;
     padding: 2px 0;
   }
-  .bracket-match { width: max-content; min-width: 0; margin: 3px 6px; }
+  .bracket-match { width: 95px; min-width: 0; margin: 3px 6px; }
   .bracket-team { min-height: 18px; padding: 3px 7px; }
   .team-name { font-size: 11px; }
   .placeholder .team-name { font-size: 10px; }
