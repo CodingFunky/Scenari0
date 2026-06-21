@@ -30,6 +30,32 @@ export function renderBracket(container, derived, highlightTeam) {
   container.querySelectorAll('.bracket-team[data-match-id]').forEach(el => {
     el.addEventListener('click', handlePickClick);
   });
+
+  if (twoSided) fitTwoSided(container);
+}
+
+// Scale the two-sided bracket to fit the available width (capped at 1× so it
+// never grows beyond the natural column widths). No-op for the linear/mobile
+// layout. Called after render and on resize (via app.js).
+export function fitTwoSided(container) {
+  const scroll = container.querySelector('.bracket-scroll');
+  const inner = container.querySelector('.bracket-two-sided');
+  if (!scroll || !inner) return;
+  const avail = scroll.clientWidth;
+  if (avail === 0) return; // hidden tab — refit when it becomes visible
+
+  inner.style.transform = 'none'; // measure at natural size
+  const naturalW = inner.scrollWidth;
+  const naturalH = inner.scrollHeight;
+  const s = Math.min(1, avail / naturalW);
+
+  if (s < 1) {
+    inner.style.transform = `scale(${s})`;
+    scroll.style.height = Math.ceil(naturalH * s) + 'px'; // collapse freed space
+  } else {
+    inner.style.transform = 'none';
+    scroll.style.height = '';
+  }
 }
 
 // ─── Linear layout (mobile): all rounds left→right, R32 stacked ───────────────

@@ -338,6 +338,11 @@ main { padding: 0; }
   display: flex;
   align-items: stretch;
 }
+/* The :last-child rule strips the border off the last column of each side; the
+   left side's last column (Semifinal) needs its divider back, toward the center. */
+.bracket-side.left .bracket-round:last-child { border-right: 1px solid var(--border); }
+/* Scaled to fit the window — keep the transform anchored top-left. */
+.bracket-two-sided { transform-origin: top left; }
 /* Center column: the final sits at the vertical middle where the two semifinals
    meet; the 3rd-place match is pulled out of flow to the bottom so it doesn't
    shift the final off-center. */

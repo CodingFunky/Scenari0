@@ -6,7 +6,7 @@ import { simulateRemaining } from './sim.js';
 import { loadOdds } from './odds.js';
 import { DEFAULT_PROXY_URL } from './config.js';
 import { renderGroupStage } from './ui/group-stage.js';
-import { renderBracket }    from './ui/bracket.js';
+import { renderBracket, fitTwoSided } from './ui/bracket.js';
 
 let DATA = null;         // { groups, group_stage_schedule, knockout_bracket }
 let RANKINGS = null;     // { [team]: rank }
@@ -35,6 +35,19 @@ async function init() {
 
   // Re-render when crossing the bracket layout breakpoint (two-sided ↔ linear).
   window.matchMedia('(min-width: 641px)').addEventListener('change', () => render(getState()));
+
+  // Rescale the two-sided bracket to fit as the window (or tab visibility) changes.
+  // Guard on width so our own height adjustment doesn't cause a refit loop.
+  const bracketEl = document.getElementById('bracket-content');
+  if (bracketEl && 'ResizeObserver' in window) {
+    let lastW = -1;
+    new ResizeObserver(entries => {
+      const w = Math.round(entries[0].contentRect.width);
+      if (w === lastW) return;
+      lastW = w;
+      fitTwoSided(bracketEl);
+    }).observe(bracketEl);
+  }
 }
 
 // ─── Render ───────────────────────────────────────────────────────────────────
