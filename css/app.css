@@ -286,12 +286,13 @@ main { padding: 0; }
 .bracket-rounds {
   display: flex;
   gap: 0;
-  min-width: 1200px;
+  min-width: 0;
   align-items: flex-start;
 }
 
+/* Fixed-width columns so the bracket doesn't stretch to fill wide screens. */
 .bracket-round {
-  flex: 1;
+  flex: 0 0 185px;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border);
@@ -308,6 +309,7 @@ main { padding: 0; }
   background: var(--bg-card2);
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
+  text-align: center;
 }
 
 .round-matches {
@@ -359,6 +361,7 @@ main { padding: 0; }
 .bracket-team {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 6px 8px;
   gap: 6px;
   transition: background 0.1s;
@@ -370,7 +373,7 @@ main { padding: 0; }
 .bracket-team.placeholder { cursor: default; }
 .placeholder .team-name { color: var(--text-dim); font-style: italic; font-size: 11px; }
 
-.team-name { font-size: 12px; color: var(--text); }
+.team-name { font-size: 12px; color: var(--text); text-align: center; white-space: nowrap; }
 
 .bracket-team.winner { background: var(--winner-bg); }
 .bracket-team.winner .team-name { color: #3fb950; font-weight: 700; }
