@@ -287,7 +287,7 @@ main { padding: 0; }
   display: flex;
   gap: 0;
   min-width: 0;
-  align-items: flex-start;
+  align-items: stretch; /* all columns share the Round-of-32 height so the tree lines up */
 }
 
 /* Fixed-width columns so the bracket doesn't stretch to fill wide screens. */
@@ -318,7 +318,7 @@ main { padding: 0; }
   justify-content: space-around;
   padding: 8px 0;
   flex: 1;
-  min-height: 1160px; /* 16 matches × ~72px = consistent column height */
+  min-height: 0; /* let the Round-of-32 column define the height; others stretch to it */
 }
 
 /* Final column needs two groups (Final + 3PP) stacked */
