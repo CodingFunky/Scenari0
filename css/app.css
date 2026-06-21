@@ -326,6 +326,25 @@ main { padding: 0; }
   justify-content: space-evenly;
 }
 
+/* Two-sided layout (desktop): left half flows toward the center, right half
+   mirrors it, and the final sits in the middle. Each .bracket-side stretches its
+   columns to equal height so the existing space-around tree alignment holds. */
+.bracket-two-sided {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+}
+.bracket-side {
+  display: flex;
+  align-items: stretch;
+}
+/* Center column: the final sits at the vertical middle where the two semifinals
+   meet; the 3rd-place match is pulled out of flow to the bottom so it doesn't
+   shift the final off-center. */
+.bracket-center { position: relative; }
+.bracket-center .center-final { justify-content: center; }
+.center-third { position: absolute; left: 0; right: 0; bottom: 0; }
+
 .bracket-half-divider {
   height: 1px;
   background: var(--border);

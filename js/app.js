@@ -32,6 +32,9 @@ async function init() {
 
   subscribe(render);
   render(getState());
+
+  // Re-render when crossing the bracket layout breakpoint (two-sided ↔ linear).
+  window.matchMedia('(min-width: 641px)').addEventListener('change', () => render(getState()));
 }
 
 // ─── Render ───────────────────────────────────────────────────────────────────

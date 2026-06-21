@@ -1,7 +1,8 @@
 import { setPick, clearMatch } from '../state.js';
 
 // Visual order of matches within each round (top→bottom) to align the bracket tree.
-// Each pair of adjacent R32 matches feeds the corresponding R16 match, etc.
+// The first half of each array feeds Semifinal 101, the second half feeds 102 —
+// so splitting each array in two gives the left/right halves of a two-sided tree.
 const ROUND_ORDER = {
   round_of_32:    [74, 77, 73, 75, 83, 84, 81, 82, 76, 78, 79, 80, 86, 88, 85, 87],
   round_of_16:    [89, 90, 93, 94, 91, 92, 95, 96],
@@ -16,44 +17,88 @@ const ROUND_LABELS = {
   semi_finals:    'Semifinals',
 };
 
+// Above this width: two-sided bracket. At/below: single-direction stack (mobile).
+const TWO_SIDED_MQ = '(min-width: 641px)';
+
 export function renderBracket(container, derived, highlightTeam) {
   const { bracket } = derived;
+  const twoSided = window.matchMedia(TWO_SIDED_MQ).matches;
+  container.innerHTML = twoSided
+    ? renderTwoSided(bracket, highlightTeam)
+    : renderLinear(bracket, highlightTeam);
 
+  container.querySelectorAll('.bracket-team[data-match-id]').forEach(el => {
+    el.addEventListener('click', handlePickClick);
+  });
+}
+
+// ─── Linear layout (mobile): all rounds left→right, R32 stacked ───────────────
+function renderLinear(bracket, highlightTeam) {
   let html = '<div class="bracket-scroll"><div class="bracket-rounds">';
 
   for (const [roundKey, label] of Object.entries(ROUND_LABELS)) {
     const ids = ROUND_ORDER[roundKey];
-    html += `<div class="bracket-round" data-round="${roundKey}">`;
-    html += `<div class="round-label">${label}</div>`;
-    html += '<div class="round-matches">';
-
-    // Insert a visual half-divider after the 8th match in R32
+    html += `<div class="bracket-round" data-round="${roundKey}"><div class="round-label">${label}</div><div class="round-matches">`;
     ids.forEach((id, i) => {
-      if (roundKey === 'round_of_32' && i === 8) {
-        html += '<div class="bracket-half-divider"></div>';
-      }
+      if (roundKey === 'round_of_32' && i === 8) html += '<div class="bracket-half-divider"></div>';
       html += renderBracketMatch(id, bracket[id], highlightTeam);
     });
-
     html += '</div></div>';
   }
 
-  // Final + Third-place playoff share the last column
-  html += '<div class="bracket-round" data-round="final">';
-  html += '<div class="round-label">Final &amp; 3rd Place</div>';
-  html += '<div class="round-matches final-col">';
+  html += '<div class="bracket-round" data-round="final"><div class="round-label">Final &amp; 3rd Place</div><div class="round-matches final-col">';
   html += renderBracketMatch(104, bracket[104], highlightTeam, 'Final');
   html += '<div class="bracket-half-divider"></div>';
   html += renderBracketMatch(103, bracket[103], highlightTeam, '3rd Place');
   html += '</div></div>';
 
   html += '</div></div>';
-  container.innerHTML = html;
+  return html;
+}
 
-  // Wire pick clicks
-  container.querySelectorAll('.bracket-team[data-match-id]').forEach(el => {
-    el.addEventListener('click', handlePickClick);
-  });
+// ─── Two-sided layout (desktop): halves meet at the final in the middle ───────
+function renderTwoSided(bracket, highlightTeam) {
+  const order = Object.keys(ROUND_LABELS);              // r32 → sf
+  const halfIds = (key, side) => {
+    const a = ROUND_ORDER[key], n = a.length / 2;
+    return side === 'A' ? a.slice(0, n) : a.slice(n);
+  };
+
+  // Left half: R32 → SF flowing toward the center.
+  let left = '';
+  for (const k of order) {
+    left += renderRoundColumn(k, ROUND_LABELS[k], halfIds(k, 'A'), bracket, highlightTeam);
+  }
+
+  // Right half: SF → R32 (reversed) so it flows from the center outward.
+  let right = '';
+  for (const k of [...order].reverse()) {
+    right += renderRoundColumn(k, ROUND_LABELS[k], halfIds(k, 'B'), bracket, highlightTeam);
+  }
+
+  const center = `<div class="bracket-round bracket-center" data-round="final">
+    <div class="round-label">Final</div>
+    <div class="round-matches center-final">
+      ${renderBracketMatch(104, bracket[104], highlightTeam, 'Final')}
+    </div>
+    <div class="center-third">
+      <div class="round-label">3rd Place</div>
+      ${renderBracketMatch(103, bracket[103], highlightTeam, '3rd Place')}
+    </div>
+  </div>`;
+
+  return `<div class="bracket-scroll"><div class="bracket-two-sided">
+    <div class="bracket-side left">${left}</div>
+    ${center}
+    <div class="bracket-side right">${right}</div>
+  </div></div>`;
+}
+
+function renderRoundColumn(roundKey, label, ids, bracket, highlightTeam) {
+  let h = `<div class="bracket-round" data-round="${roundKey}"><div class="round-label">${label}</div><div class="round-matches">`;
+  for (const id of ids) h += renderBracketMatch(id, bracket[id], highlightTeam);
+  h += '</div></div>';
+  return h;
 }
 
 function handlePickClick(e) {
