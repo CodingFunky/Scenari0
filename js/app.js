@@ -33,6 +33,8 @@ async function init() {
   subscribe(render);
   render(getState());
 
+  autoSyncOnLoad();
+
   // Re-render when crossing the bracket layout breakpoint (two-sided ↔ linear).
   window.matchMedia('(min-width: 641px)').addEventListener('change', () => render(getState()));
 
@@ -192,6 +194,22 @@ function setupSync() {
   }
 
   btn.addEventListener('click', () => runSync(btn));
+}
+
+// Auto-sync once on load. The Worker's per-IP rate limit applies to this exactly
+// like a manual click (it's the same request path); we add a client-side cooldown
+// so refreshing doesn't waste the football-data quota. The manual button ignores
+// the cooldown, so it's always available.
+const AUTO_SYNC_KEY = 'last_auto_sync';
+const AUTO_SYNC_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes per browser
+
+function autoSyncOnLoad() {
+  const btn = document.getElementById('sync-btn');
+  if (!btn || !getProxyUrl()) return;
+  const last = Number(localStorage.getItem(AUTO_SYNC_KEY) || 0);
+  if (Date.now() - last < AUTO_SYNC_COOLDOWN_MS) return; // synced recently — skip
+  localStorage.setItem(AUTO_SYNC_KEY, String(Date.now()));
+  runSync(btn); // same path as manual: server rate limit + cache fallback still apply
 }
 
 async function runSync(btn) {
