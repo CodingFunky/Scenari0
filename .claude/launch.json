@@ -4,7 +4,7 @@
     {
       "name": "scenari0",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "3333", "--directory", "C:\\Users\\Ryan\\Documents\\GitHub\\Scenari0"],
+      "runtimeArgs": ["C:\\Users\\Ryan\\Documents\\GitHub\\Scenari0\\dev-server.py"],
       "port": 3333
     }
   ]
