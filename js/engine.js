@@ -41,8 +41,9 @@ export function deriveAll(state, data, rankings) {
   const rankedThirds = rankThirds(allThirds, rankings);
   const qualifiedGroups = rankedThirds.slice(0, 8).map(t => t.group);
 
-  // 3. Assign qualifying thirds to R32 slots via bipartite matching
-  const thirdAssignment = assignThirdsToSlots(qualifiedGroups, knockout_bracket);
+  // 3. Assign qualifying thirds to R32 slots (official Annex C table when all 8
+  //    are known; bipartite fallback for partial standings).
+  const thirdAssignment = assignThirdsToSlots(qualifiedGroups, knockout_bracket, data.annexC);
 
   // 4. Resolve the knockout bracket
   const bracket = resolveBracket(knockout_bracket, seeds, picks, thirdAssignment);
@@ -126,10 +127,18 @@ function rankThirds(allThirds, rankings) {
 
 // ─── Third-place slot assignment (bipartite matching) ────────────────────────
 
-// Each R32 slot has a set of eligible groups (from knockout_bracket data).
-// Find an assignment of qualifying group letters to slots such that each group
-// goes only to an eligible slot. Uses backtracking; deterministic (alphabetical order).
-function assignThirdsToSlots(qualifiedGroups, knockoutBracket) {
+// Assign the qualifying thirds to R32 slots. When all 8 thirds are known, use
+// FIFA's official Annex C table (the authoritative mapping — eligibility alone
+// does NOT determine it uniquely). For partial standings (<8 thirds known, or a
+// combo not in the table) fall back to constraint-based bipartite matching so the
+// bracket still shows something while results are being entered.
+function assignThirdsToSlots(qualifiedGroups, knockoutBracket, annexTable) {
+  if (annexTable && qualifiedGroups.length === 8) {
+    const key = [...qualifiedGroups].sort().join('');
+    const official = annexTable[key];
+    if (official) return { ...official };
+  }
+
   const eligibility = {}; // slot → Set<groupLetter>
   for (const m of knockoutBracket.round_of_32) {
     if (m.third_place_slot && m.eligible_third_groups) {

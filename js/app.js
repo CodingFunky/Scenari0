@@ -15,12 +15,14 @@ let highlightTeam = null;
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 
 async function init() {
-  const [wcData, rankData] = await Promise.all([
+  const [wcData, rankData, annexData] = await Promise.all([
     fetch('./data/worldcup_2026.json').then(r => r.json()),
     fetch('./data/fifa_rankings_2026.json').then(r => r.json()),
+    fetch('./data/annex_c.json').then(r => r.json()),
   ]);
 
   DATA = wcData;
+  DATA.annexC = annexData.table; // official FIFA Annex C third-place→slot table
   RANKINGS = rankData.rankings;
 
   setupTabs();
