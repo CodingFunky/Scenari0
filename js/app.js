@@ -7,6 +7,7 @@ import { loadOdds } from './odds.js';
 import { DEFAULT_PROXY_URL } from './config.js';
 import { renderGroupStage } from './ui/group-stage.js';
 import { renderBracket, fitTwoSided } from './ui/bracket.js';
+import { renderUpcoming } from './ui/upcoming.js';
 
 let DATA = null;         // { groups, group_stage_schedule, knockout_bracket }
 let RANKINGS = null;     // { [team]: rank }
@@ -66,6 +67,7 @@ function render(state) {
 
   renderGroupStage(document.getElementById('group-stage-content'), derived, highlightTeam);
   renderBracket(document.getElementById('bracket-content'), derived, highlightTeam);
+  renderUpcoming(document.getElementById('upcoming-strip'), DATA.group_stage_schedule.matches, state.scores);
   updateThirdsPanel(derived);
 
   if (window.scrollY !== scrollY) window.scrollTo(0, scrollY);

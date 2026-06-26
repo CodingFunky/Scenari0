@@ -199,6 +199,54 @@ body {
 
 main { padding: 0; }
 
+/* ── Upcoming matches strip (next to the tabs) ────────────────────────────── */
+.upcoming-strip {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  padding-bottom: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.upcoming-strip::-webkit-scrollbar { height: 6px; }
+.upcoming-strip::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 3px; }
+
+.upcoming-label {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+}
+.upcoming-empty { font-size: 12px; color: var(--text-faint); }
+
+.upcoming-card {
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+.up-date {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+.up-match {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.up-team { display: flex; align-items: center; gap: 5px; }
+.up-vs { color: var(--text-faint); font-size: 10px; }
+
 /* ── Group grid ───────────────────────────────────────────────────────────── */
 .groups-grid {
   display: grid;
@@ -822,6 +870,7 @@ main { padding: 0; }
 
   /* Strip the intro text; push content below the fixed top bar (tabs + hamburger) */
   .panel-intro { display: none; }
+  .upcoming-strip { display: none; } /* no room beside the floating mobile tabs */
   main { padding-top: 64px; }
   .groups-grid {
     grid-template-columns: 1fr;
