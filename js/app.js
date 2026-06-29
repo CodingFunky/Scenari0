@@ -1,7 +1,7 @@
 import { deriveAll } from './engine.js';
-import { getState, subscribe, resetState, applySyncedScores,
+import { getState, subscribe, resetState, applySyncResults,
          applySimResults, resetSimulation } from './state.js';
-import { fetchFinishedMatches, computeSyncUpdates } from './sync.js';
+import { fetchFinishedMatches, computeSyncUpdates, computeKnockoutSync } from './sync.js';
 import { simulateRemaining } from './sim.js';
 import { loadOdds } from './odds.js';
 import { DEFAULT_PROXY_URL } from './config.js';
@@ -233,19 +233,27 @@ async function runSync(btn) {
   try {
     const { fixtures, cached } = await fetchFinishedMatches(proxy);
     const schedule = DATA.group_stage_schedule.matches;
-    const { updates, report } = computeSyncUpdates(fixtures, schedule, getState().scores);
-    const n = applySyncedScores(updates); // triggers recompute of standings + bracket
+    const cur = getState();
 
-    let msg = `Synced ${n} match${n === 1 ? '' : 'es'}`;
+    // Group results → scores; then knockout results → synced picks (needs the
+    // group results applied first so the bracket participants resolve).
+    const { updates, report } = computeSyncUpdates(fixtures, schedule, cur.scores);
+    const workingScores = { ...cur.scores, ...updates };
+    const { apiPicks, applied: koApplied } = computeKnockoutSync(
+      fixtures, DATA, RANKINGS, workingScores, cur.picks || {}, cur.apiPicks || {}, cur.simPicks || {},
+    );
+
+    applySyncResults({ scoreUpdates: updates, apiPicks }); // one recompute of standings + bracket
+
+    let msg = `Synced ${report.applied} group`;
+    if (koApplied || Object.keys(apiPicks).length) msg += ` + ${koApplied} knockout`;
     const extras = [];
     if (report.skippedLocked)   extras.push(`${report.skippedLocked} locked`);
-    if (report.alreadyCurrent)  extras.push(`${report.alreadyCurrent} unchanged`);
-    if (report.unmatched.length) extras.push(`${report.unmatched.length} unmatched`);
-    if (cached)                  extras.push('cached — live fetch failed');
+    if (cached)                 extras.push('cached — live fetch failed');
     if (extras.length) msg += ` · ${extras.join(', ')}`;
 
     setSyncStatus(cached ? 'error' : 'success', msg);
-    if (report.unmatched.length) console.warn('Sync: unmatched fixtures:', report.unmatched);
+    if (report.unmatched.length) console.warn('Sync: unmatched group fixtures:', report.unmatched);
   } catch (err) {
     setSyncStatus('error', `Sync failed: ${err.message}`);
     console.error('Sync error:', err);

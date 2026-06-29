@@ -4,8 +4,10 @@
 
 // scores: group results (idx 0-71) with src 'manual'|'api'|'sim'
 // picks: manual knockout picks (id 73-104) -> 'h'|'a'
-// simPicks: simulated knockout picks -> 'h'|'a' (manual picks override these)
-const EMPTY = { scores: {}, picks: {}, simPicks: {} };
+// apiPicks: synced (real) knockout results -> 'h'|'a'
+// simPicks: simulated knockout picks -> 'h'|'a'
+// precedence when resolving: manual picks > apiPicks > simPicks
+const EMPTY = { scores: {}, picks: {}, simPicks: {}, apiPicks: {} };
 let _state = loadFromUrl();
 const _listeners = new Set();
 
@@ -33,14 +35,13 @@ export function setScore(matchIdx, side, goals) {
   setState({ scores });
 }
 
-// Batch-apply synced results (from sync.js) in one update → one re-render.
-// `updates` is { [matchIdx]: { h, a, src: 'api' } }. Returns count applied.
-export function applySyncedScores(updates) {
-  const keys = updates ? Object.keys(updates) : [];
-  if (keys.length === 0) return 0;
-  const scores = { ..._state.scores, ...updates };
-  setState({ scores });
-  return keys.length;
+// Batch-apply sync results (group scores + synced knockout picks) in one update.
+// `scoreUpdates` is { [idx]: {h,a,src:'api'} }; `apiPicks` is the full synced
+// knockout pick map (id -> 'h'|'a'). One setState → one re-render.
+export function applySyncResults({ scoreUpdates, apiPicks } = {}) {
+  const next = { scores: { ..._state.scores, ...(scoreUpdates || {}) } };
+  if (apiPicks) next.apiPicks = apiPicks;
+  setState(next);
 }
 
 export function setPick(matchId, slot) {
@@ -63,7 +64,7 @@ export function clearMatch(matchId) {
 }
 
 export function resetState() {
-  _state = { scores: {}, picks: {}, simPicks: {} };
+  _state = { scores: {}, picks: {}, simPicks: {}, apiPicks: {} };
   saveToUrl();
   _listeners.forEach(cb => cb(_state));
 }
@@ -110,6 +111,7 @@ function loadFromUrl() {
     const parsed = JSON.parse(atob(s));
     if (typeof parsed !== 'object' || !parsed.scores || !parsed.picks) return { ...EMPTY };
     if (!parsed.simPicks) parsed.simPicks = {}; // back-compat for older URLs
+    if (!parsed.apiPicks) parsed.apiPicks = {};
     return parsed;
   } catch {
     return { ...EMPTY };

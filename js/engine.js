@@ -4,8 +4,9 @@ import { GROUP_TB, THIRD_TB, compare } from './tiebreaker.js';
 
 export function deriveAll(state, data, rankings) {
   const { scores } = state;
-  // Effective picks: simulated picks underneath, manual picks take precedence.
-  const picks = { ...(state.simPicks || {}), ...(state.picks || {}) };
+  // Effective picks by precedence: simulated (lowest) < synced real results <
+  // manual user picks (highest, so a user what-if always overrides).
+  const picks = { ...(state.simPicks || {}), ...(state.apiPicks || {}), ...(state.picks || {}) };
   const { groups, group_stage_schedule, knockout_bracket } = data;
   const schedule = group_stage_schedule.matches; // indexed 0–71
 

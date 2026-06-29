@@ -1,4 +1,8 @@
 import { normalizeTeam } from './teams.js';
+import { deriveAll } from './engine.js';
+
+const KNOCKOUT_IDS = Array.from({ length: 104 - 73 + 1 }, (_, i) => 73 + i);
+const isTeam = s => typeof s === 'string' && s.length > 0 && !s.startsWith('(');
 
 // football-data.org v4. World Cup competition code is "WC"; override at runtime
 // via localStorage 'sync_competition' if the code differs (section C).
@@ -30,10 +34,12 @@ export function parseFixtures(matchesArray) {
   return (matchesArray || []).map(m => ({
     fixtureId: m.id ?? null,
     status: m.status ?? '',
+    stage: m.stage ?? '',                    // 'GROUP_STAGE' vs knockout stages
     home: m.homeTeam?.name ?? '',
     away: m.awayTeam?.name ?? '',
     homeScore: m.score?.fullTime?.home,
     awayScore: m.score?.fullTime?.away,
+    winner: m.score?.winner ?? null,         // 'HOME_TEAM' | 'AWAY_TEAM' | 'DRAW' (incl. ET/pens)
   }));
 }
 
@@ -53,6 +59,7 @@ export function computeSyncUpdates(fixtures, schedule, currentScores) {
   };
 
   for (const f of fixtures) {
+    if (f.stage && f.stage !== 'GROUP_STAGE') continue; // knockout handled separately
     if (f.status !== 'FINISHED' || f.homeScore == null || f.awayScore == null) {
       report.notFinished++;
       continue;
@@ -85,6 +92,52 @@ export function computeSyncUpdates(fixtures, schedule, currentScores) {
   }
 
   return { updates, report };
+}
+
+// Sync finished KNOCKOUT results into positional picks. Knockout participants
+// depend on earlier results, so we resolve the bracket iteratively (with group
+// results already applied), match each finished knockout fixture to its slot by
+// the resolved team pair, and record the winner as an 'api' pick. Manual picks
+// are left untouched (locked); existing api picks are kept (idempotent).
+// Returns { apiPicks, applied } where apiPicks is the full new map.
+export function computeKnockoutSync(fixtures, data, rankings, workingScores, manualPicks, existingApiPicks, simPicks) {
+  // Winner team name, keyed by the normalized unordered pair — knockout fixtures
+  // only (a same-group pair could also meet again in a later knockout round, so
+  // excluding group fixtures avoids a collision).
+  const winnerByPair = {};
+  for (const f of fixtures) {
+    if (f.stage === 'GROUP_STAGE') continue;
+    if (f.status !== 'FINISHED') continue;
+    if (f.winner !== 'HOME_TEAM' && f.winner !== 'AWAY_TEAM') continue;
+    const key = [normalizeTeam(f.home), normalizeTeam(f.away)].sort().join('|');
+    winnerByPair[key] = f.winner === 'HOME_TEAM' ? f.home : f.away;
+  }
+
+  const apiPicks = { ...(existingApiPicks || {}) };
+  let applied = 0, added = true, guard = 0;
+  while (added && guard++ < 100) {
+    added = false;
+    const { bracket } = deriveAll(
+      { scores: workingScores, picks: manualPicks, apiPicks, simPicks: simPicks || {} },
+      data, rankings,
+    );
+    for (const id of KNOCKOUT_IDS) {
+      if (manualPicks[id] !== undefined || apiPicks[id] !== undefined) continue;
+      const b = bracket[id];
+      if (!b || !isTeam(b.home) || !isTeam(b.away)) continue;
+      const key = [normalizeTeam(b.home), normalizeTeam(b.away)].sort().join('|');
+      const winner = winnerByPair[key];
+      if (!winner) continue; // not played yet
+      const nw = normalizeTeam(winner);
+      const slot = nw === normalizeTeam(b.home) ? 'h'
+                 : nw === normalizeTeam(b.away) ? 'a' : null;
+      if (!slot) continue;
+      apiPicks[id] = slot;
+      applied++;
+      added = true;
+    }
+  }
+  return { apiPicks, applied };
 }
 
 // ─── Network ──────────────────────────────────────────────────────────────────

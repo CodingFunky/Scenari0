@@ -151,6 +151,7 @@ export function simulateRemaining(state, data, rankings, oddsByPair = null, opts
   const cfg = opts.cfg || SIM_CFG;
   const schedule = data.group_stage_schedule.matches;
   const manualPicks = state.picks || {};
+  const apiPicks = state.apiPicks || {}; // real synced knockout results — never re-simulated
 
   // 1) Group stage
   const scoreUpdates = {};
@@ -168,10 +169,10 @@ export function simulateRemaining(state, data, rankings, oddsByPair = null, opts
   const simPicks = {};
   let guard = 0;
   while (guard++ < 200) {
-    const { bracket } = deriveAll({ scores: workingScores, picks: manualPicks, simPicks }, data, rankings);
+    const { bracket } = deriveAll({ scores: workingScores, picks: manualPicks, apiPicks, simPicks }, data, rankings);
     let target = null;
     for (const id of KNOCKOUT_IDS) {
-      if (manualPicks[id] !== undefined || simPicks[id] !== undefined) continue;
+      if (manualPicks[id] !== undefined || apiPicks[id] !== undefined || simPicks[id] !== undefined) continue;
       const b = bracket[id];
       if (b && isTeam(b.home) && isTeam(b.away)) { target = { id, b }; break; }
     }
